@@ -1,3 +1,5 @@
+// Package config carrega a configuracao do Arcanum API a partir de variaveis de ambiente.
+// Todas as variaveis usam o prefixo GATEWAY_ e possuem valores padrao seguros para desenvolvimento.
 package config
 
 import (
@@ -5,20 +7,45 @@ import (
 	"strconv"
 )
 
+// Config armazena todas as configuracoes do gateway.
+// Cada campo mapeia para uma variavel de ambiente com prefixo GATEWAY_.
 type Config struct {
-	Port              int
-	WebhookForwardURL string
-	WebhookSecret     string
-	DBPath            string
+	// Port define a porta HTTP do servidor (GATEWAY_PORT, padrao: 3100).
+	Port int
 
-	MinDelayMs       int
-	MaxDelayMs       int
+	// WebhookForwardURL e a URL padrao para encaminhar mensagens recebidas via webhook.
+	// Pode ser sobrescrita por instancia via API (GATEWAY_WEBHOOK_FORWARD_URL).
+	WebhookForwardURL string
+
+	// WebhookSecret e o secret usado para assinar webhooks com HMAC-SHA256.
+	// Se vazio, os webhooks sao enviados sem assinatura (GATEWAY_META_APP_SECRET).
+	WebhookSecret string
+
+	// DBPath e o diretorio onde os arquivos SQLite de sessao sao armazenados.
+	// Cada instancia cria um arquivo .db separado (GATEWAY_DB_PATH, padrao: ./data).
+	DBPath string
+
+	// MinDelayMs e o delay minimo (ms) antes de enviar uma mensagem — parte do anti-ban.
+	MinDelayMs int
+
+	// MaxDelayMs e o delay maximo (ms) antes de enviar uma mensagem — parte do anti-ban.
+	MaxDelayMs int
+
+	// TypingDurationMs e a duracao minima (ms) do indicador "digitando..." antes de enviar.
 	TypingDurationMs int
-	MsPerChar        int
-	MaxTypingMs      int
-	RateLimitPerMin  int
+
+	// MsPerChar define quantos milissegundos o "digitando..." dura por caractere da mensagem.
+	MsPerChar int
+
+	// MaxTypingMs e a duracao maxima (ms) do indicador "digitando..." independente do tamanho.
+	MaxTypingMs int
+
+	// RateLimitPerMin define o numero maximo de mensagens enviadas por minuto por instancia.
+	RateLimitPerMin int
 }
 
+// Load carrega a configuracao a partir das variaveis de ambiente.
+// Valores ausentes usam os padroes definidos.
 func Load() *Config {
 	return &Config{
 		Port:              envInt("GATEWAY_PORT", 3100),

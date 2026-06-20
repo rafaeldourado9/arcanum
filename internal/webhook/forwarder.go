@@ -1,3 +1,7 @@
+// Package webhook encaminha mensagens recebidas do WhatsApp para um backend externo via HTTP POST.
+// O payload segue o formato da Meta WhatsApp Cloud API, permitindo que qualquer backend
+// que ja processe webhooks do Meta funcione sem alteracao.
+// Opcionalmente assina o payload com HMAC-SHA256 (header X-Hub-Signature-256).
 package webhook
 
 import (

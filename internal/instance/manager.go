@@ -1,3 +1,7 @@
+// Package instance gerencia multiplas conexoes WhatsApp simultaneas.
+// Cada instancia possui seu proprio provider (whatsmeow), rate limiter,
+// webhook forwarder, e configuracoes independentes.
+// Thread-safe via sync.RWMutex — seguro para acesso concorrente pelos handlers HTTP.
 package instance
 
 import (

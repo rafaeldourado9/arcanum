@@ -9,6 +9,9 @@ import (
 	"github.com/rafaeldourado9/arcanum/internal/provider"
 )
 
+// HumanizedSend simula comportamento humano antes de enviar uma mensagem.
+// Sequencia: delay aleatorio -> mark as read -> "digitando..." -> pausa -> enviar.
+// Isso reduz drasticamente o risco de deteccao e banimento pelo WhatsApp.
 func HumanizedSend(p provider.WhatsAppProvider, to string, text string, cfg *config.Config) {
 	preDelay := randBetween(cfg.MinDelayMs, cfg.MaxDelayMs)
 	time.Sleep(time.Duration(preDelay) * time.Millisecond)
