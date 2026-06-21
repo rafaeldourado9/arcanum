@@ -44,7 +44,7 @@ func handleSetWebhook(mgr *instance.Manager, secret string) http.HandlerFunc {
 
 		if req.URL != "" {
 			inst.WebhookConfig.URL = req.URL
-			inst.Webhook = webhook.NewForwarder(req.URL, secret)
+			inst.Webhook = webhook.NewForwarder(req.URL, "simple", secret)
 		}
 		if len(req.Events) > 0 {
 			inst.WebhookConfig.Events = req.Events

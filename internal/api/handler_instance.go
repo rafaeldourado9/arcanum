@@ -4,11 +4,62 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rafaeldourado9/arcanum/internal/instance"
+	"github.com/rafaeldourado9/arcanum/internal/provider"
 	qrcode "github.com/skip2/go-qrcode"
 )
+
+// QR generation runs in a background goroutine after Connect() returns (see
+// WhatsmeowProvider.connectWithQR), so the code is rarely ready immediately —
+// poll briefly instead of forcing the caller to make a second request.
+const (
+	qrPollTimeout  = 5 * time.Second
+	qrPollInterval = 150 * time.Millisecond
+)
+
+func waitForQR(inst *instance.Instance) string {
+	deadline := time.Now().Add(qrPollTimeout)
+	for {
+		qr := inst.Provider.QRCode()
+		if qr != "" || inst.Provider.Status() == provider.StatusConnected {
+			return qr
+		}
+		if time.Now().After(deadline) {
+			return inst.Provider.QRCode()
+		}
+		time.Sleep(qrPollInterval)
+	}
+}
+
+func writeQRResponse(
+	w http.ResponseWriter, r *http.Request, instanceName string, status provider.ConnectionStatus, qr string,
+) {
+	if qr == "" {
+		writeJSON(w, 200, map[string]any{"instanceName": instanceName, "status": status, "qr": ""})
+		return
+	}
+
+	png, err := qrcode.Encode(qr, qrcode.Medium, 300)
+	if err != nil {
+		writeJSON(w, 500, map[string]string{"error": err.Error()})
+		return
+	}
+
+	if r.URL.Query().Get("format") == "png" {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(png)
+		return
+	}
+
+	writeJSON(w, 200, map[string]any{
+		"instanceName": instanceName,
+		"status":       status,
+		"qr":           "data:image/png;base64," + b64encode(png),
+	})
+}
 
 func b64encode(data []byte) string {
 	return base64.StdEncoding.EncodeToString(data)
@@ -51,11 +102,8 @@ func handleConnectInstance(mgr *instance.Manager) http.HandlerFunc {
 			return
 		}
 
-		writeJSON(w, 200, map[string]any{
-			"instanceName": inst.Name,
-			"status":       inst.Provider.Status(),
-			"qr":           inst.Provider.QRCode(),
-		})
+		qr := waitForQR(inst)
+		writeQRResponse(w, r, inst.Name, inst.Provider.Status(), qr)
 	}
 }
 
@@ -68,14 +116,7 @@ func handleConnectionState(mgr *instance.Manager) http.HandlerFunc {
 			return
 		}
 
-		resp := map[string]any{
-			"instanceName": inst.Name,
-			"status":       inst.Provider.Status(),
-		}
-		if qr := inst.Provider.QRCode(); qr != "" {
-			resp["qr"] = qr
-		}
-		writeJSON(w, 200, resp)
+		writeQRResponse(w, r, inst.Name, inst.Provider.Status(), inst.Provider.QRCode())
 	}
 }
 
@@ -184,31 +225,14 @@ func handleGetQR(mgr *instance.Manager) http.HandlerFunc {
 		qr := inst.Provider.QRCode()
 		if qr == "" {
 			msg := "No QR code available"
-			if inst.Provider.Status() == "connected" {
+			if inst.Provider.Status() == provider.StatusConnected {
 				msg = "Already authenticated"
 			}
 			writeJSON(w, 200, map[string]any{"status": inst.Provider.Status(), "message": msg})
 			return
 		}
 
-		if r.URL.Query().Get("format") == "png" {
-			png, err := qrcode.Encode(qr, qrcode.Medium, 300)
-			if err != nil {
-				writeJSON(w, 500, map[string]string{"error": err.Error()})
-				return
-			}
-			w.Header().Set("Content-Type", "image/png")
-			w.Write(png)
-			return
-		}
-
-		png, err := qrcode.Encode(qr, qrcode.Medium, 300)
-		if err != nil {
-			writeJSON(w, 500, map[string]string{"error": err.Error()})
-			return
-		}
-		dataURL := "data:image/png;base64," + b64encode(png)
-		writeJSON(w, 200, map[string]any{"qr": dataURL, "status": "qr"})
+		writeQRResponse(w, r, inst.Name, inst.Provider.Status(), qr)
 	}
 }
 

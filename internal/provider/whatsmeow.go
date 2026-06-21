@@ -163,7 +163,12 @@ func (w *WhatsmeowProvider) handleMessage(evt *events.Message) {
 
 	msg := IncomingMessage{
 		MessageID: evt.Info.ID,
-		From:      evt.Info.Sender.User,
+		// Sender.String() keeps the JID server (e.g. "@lid" vs "@s.whatsapp.net").
+		// WhatsApp increasingly routes senders through LIDs, which live in a
+		// different numeric namespace than phone numbers — replying with just
+		// the bare user-part number (as if it were always a phone number) sends
+		// to a nonexistent account and the message silently never arrives.
+		From:      evt.Info.Sender.String(),
 		Timestamp: evt.Info.Timestamp.Unix(),
 		PushName:  evt.Info.PushName,
 		Type:      "unknown",
@@ -247,13 +252,24 @@ func (w *WhatsmeowProvider) Disconnect() error {
 	return nil
 }
 
-func toJID(phone string) types.JID {
+// toJID builds the JID to send to. If the input is already a full JID (e.g.
+// "104200855892049@lid", as received from incoming messages — see OnMessage),
+// it's parsed as-is so replies go back through the same identifier namespace
+// the message came from. Plain digit strings (e.g. "5511999999999", as passed
+// by direct API callers) are treated as phone numbers, same as before.
+func toJID(to string) types.JID {
+	if strings.Contains(to, "@") {
+		if jid, err := types.ParseJID(to); err == nil {
+			return jid
+		}
+	}
+
 	clean := strings.Map(func(r rune) rune {
 		if r >= '0' && r <= '9' {
 			return r
 		}
 		return -1
-	}, phone)
+	}, to)
 	return types.NewJID(clean, types.DefaultUserServer)
 }
 

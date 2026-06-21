@@ -17,6 +17,12 @@ type Config struct {
 	// Pode ser sobrescrita por instancia via API (GATEWAY_WEBHOOK_FORWARD_URL).
 	WebhookForwardURL string
 
+	// WebhookFormat define o formato do webhook: "meta" (compativel com Meta Cloud API)
+	// ou "simple" (formato simplificado para integracao direta com agent-core).
+	// Padrao: "meta" para compatibilidade. Use "simple" para integracoes novas.
+	// (GATEWAY_WEBHOOK_FORMAT)
+	WebhookFormat string
+
 	// WebhookSecret e o secret usado para assinar webhooks com HMAC-SHA256.
 	// Se vazio, os webhooks sao enviados sem assinatura (GATEWAY_META_APP_SECRET).
 	WebhookSecret string
@@ -49,7 +55,8 @@ type Config struct {
 func Load() *Config {
 	return &Config{
 		Port:              envInt("GATEWAY_PORT", 3100),
-		WebhookForwardURL: envStr("GATEWAY_WEBHOOK_FORWARD_URL", "http://api:8000/api/v1/whatsapp/webhook"),
+		WebhookForwardURL: envStr("GATEWAY_WEBHOOK_FORWARD_URL", ""),
+		WebhookFormat:     envStr("GATEWAY_WEBHOOK_FORMAT", "simple"),
 		WebhookSecret:     envStr("GATEWAY_META_APP_SECRET", ""),
 		DBPath:            envStr("GATEWAY_DB_PATH", "./data"),
 

@@ -49,14 +49,19 @@ func handleSendText(mgr *instance.Manager, cfg *config.Config) http.HandlerFunc 
 			return
 		}
 
-		antiban.HumanizedSend(inst.Provider, req.Number, req.Text, cfg)
-		result, err := inst.Provider.SendText(provider.SendTextOptions{To: req.Number, Text: req.Text})
-		if err != nil {
-			writeJSON(w, 500, map[string]string{"error": err.Error()})
-			return
-		}
+		// The anti-ban delay (pre-delay + typing simulation) can take up to ~13s by
+		// design — it paces what WhatsApp sees, it's not part of the caller's HTTP
+		// contract. Acknowledge immediately and run the humanized send in the
+		// background so callers never need a long timeout to get a reply queued.
+		go func() {
+			antiban.HumanizedSend(inst.Provider, req.Number, req.Text, cfg)
+			sendWithRetry(req.Number, func() error {
+				_, err := inst.Provider.SendText(provider.SendTextOptions{To: req.Number, Text: req.Text})
+				return err
+			})
+		}()
 
-		writeJSON(w, 200, map[string]any{"ok": true, "messageId": result.MessageID, "provider": result.Provider})
+		writeJSON(w, 202, map[string]any{"ok": true, "status": "queued"})
 	}
 }
 

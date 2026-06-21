@@ -84,7 +84,7 @@ func (m *Manager) Create(name string, webhookURL string, events []string) (*Inst
 		whCfg.Events = []string{"messages", "status"}
 	}
 
-	fwd := webhook.NewForwarder(whCfg.URL, m.cfg.WebhookSecret)
+	fwd := webhook.NewForwarder(whCfg.URL, m.cfg.WebhookFormat, m.cfg.WebhookSecret)
 	rl := antiban.NewRateLimiter(m.cfg.RateLimitPerMin)
 
 	inst := &Instance{
