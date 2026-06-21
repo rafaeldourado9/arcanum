@@ -11,13 +11,24 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rafaeldourado9/arcanum/internal/media"
 	"go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/proto/waCompanionReg"
 	"go.mau.fi/whatsmeow/proto/waE2E"
+	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 	waLog "go.mau.fi/whatsmeow/util/log"
 	"google.golang.org/protobuf/proto"
 )
+
+// WhatsApp's Linked Devices screen picks an icon from a fixed set tied to
+// PlatformType (browser logos, phone, desktop, ...) — there's no way to show
+// a custom logo image. DESKTOP gives a generic computer icon next to our name
+// instead of the "Outro dispositivo"/question-mark fallback for UNKNOWN.
+func init() {
+	store.DeviceProps.Os = proto.String("Arcanum")
+	store.DeviceProps.PlatformType = waCompanionReg.DeviceProps_DESKTOP.Enum()
+}
 
 type WhatsmeowProvider struct {
 	dbPath            string

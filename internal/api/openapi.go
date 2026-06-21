@@ -46,13 +46,17 @@ func buildPaths() map[string]any {
 			"webhook":      strProp("Webhook URL for events", "https://example.com/webhook"),
 			"webhookEvents": arrProp("Events to subscribe", []string{"messages", "status", "groups"}),
 		})),
-		"/api/instance/connect/{instance}": pathGetParam("Instance", "Connect instance", "Connect and get QR code", "instance"),
-		"/api/instance/connectionState/{instance}": pathGetParam("Instance", "Get connection state", "Returns current connection status", "instance"),
+		"/api/instance/connect/{instance}": pathGetQR("Instance", "Connect instance", "Connect and get QR code (waits briefly for the code to be ready)"),
+		"/api/instance/connectionState/{instance}": pathGetQR("Instance", "Get connection state", "Returns current connection status and QR code if pending"),
+		"/api/instance/qr/{instance}": pathGetQR("Instance", "Get QR code", "Returns the current QR code for a pending connection"),
 		"/api/instance/logout/{instance}": pathDelParam("Instance", "Logout instance", "Disconnect and clear session", "instance"),
 		"/api/instance/delete/{instance}": pathDelParam("Instance", "Delete instance", "Remove instance completely", "instance"),
 		"/api/instance/restart/{instance}": pathPostParam("Instance", "Restart instance", "Reconnect instance", "instance"),
 		"/api/instance/setPresence/{instance}": pathPost("Instance", "Set presence", "Set online/offline presence", bodyObj(map[string]any{
 			"presence": strProp("Presence type", "available"),
+		})),
+		"/api/instance/pair/{instance}": pathPost("Instance", "Pair by phone number", "Get a pairing code to link via phone number instead of scanning a QR code", bodyObj(map[string]any{
+			"phone": strProp("Phone number with country code", "5511999999999"),
 		})),
 		"/api/instance/fetchInstances": pathGet("Instance", "Fetch all instances", "List all created instances"),
 
@@ -297,9 +301,45 @@ func instanceParam() map[string]any {
 	}
 }
 
+func formatParam() map[string]any {
+	return map[string]any{
+		"name": "format", "in": "query", "required": false,
+		"schema":      map[string]any{"type": "string", "enum": []string{"png"}},
+		"description": "Set to 'png' to get the QR code as a binary PNG image instead of JSON",
+	}
+}
+
 func pathGetParam(tag, summary, desc, _ string) map[string]any {
 	o := op(tag, summary, desc)
 	o["parameters"] = []map[string]any{instanceParam()}
+	return map[string]any{"get": o}
+}
+
+// pathGetQR documents GET endpoints backed by writeQRResponse: they return the
+// QR code as a JSON data URL by default, or a binary PNG with ?format=png.
+func pathGetQR(tag, summary, desc string) map[string]any {
+	o := op(tag, summary, desc)
+	o["parameters"] = []map[string]any{instanceParam(), formatParam()}
+	o["responses"] = map[string]any{
+		"200": map[string]any{
+			"description": "QR code as JSON (data URL), or a binary PNG with ?format=png",
+			"content": map[string]any{
+				"application/json": map[string]any{
+					"schema": map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"instanceName": strProp("Instance name", "default"),
+							"status":       strProp("Connection status", "qr"),
+							"qr":           strProp("QR code as a data URL", "data:image/png;base64,..."),
+						},
+					},
+				},
+				"image/png": map[string]any{
+					"schema": map[string]any{"type": "string", "format": "binary"},
+				},
+			},
+		},
+	}
 	return map[string]any{"get": o}
 }
 
