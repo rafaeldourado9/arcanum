@@ -59,6 +59,10 @@ type IncomingMessage struct {
 	Timestamp int64      `json:"timestamp"`           // Timestamp Unix
 	PushName  string     `json:"pushName,omitempty"` // Nome de exibicao do remetente
 	Type      string     `json:"type"`               // Tipo da mensagem
+	// FromMe marca mensagem enviada PELO proprio numero conectado -- inclusive
+	// as que o atendente digita no celular. Encaminhar isso e o que permite a
+	// aplicacao saber que um humano entrou na conversa e calar o bot dela.
+	FromMe    bool       `json:"fromMe"`             // Enviada pelo proprio numero
 	Text      string     `json:"text,omitempty"`     // Texto (para type=text) ou caption (para midia)
 	Media     *MediaData `json:"media,omitempty"`    // Midia anexada (nil se for apenas texto)
 }

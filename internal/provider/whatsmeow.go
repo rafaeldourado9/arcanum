@@ -165,11 +165,21 @@ func (w *WhatsmeowProvider) handleMessage(evt *events.Message) {
 		return
 	}
 
-	if evt.Info.IsFromMe {
-		return
-	}
 	if evt.Info.Chat.Server == "g.us" {
 		return
+	}
+
+	// Messages sent by the connected number itself used to be dropped here.
+	// They are forwarded now, flagged, because they carry the one signal
+	// nothing else does: a human at the counter answering the customer. The
+	// consumer needs that to step its bot out of the conversation — silence
+	// looked exactly like "no one is there".
+	//
+	// The conversation key must be the same string in both directions, so an
+	// outgoing message reports the CHAT (the customer), not the sender (us).
+	from := evt.Info.Sender.String()
+	if evt.Info.IsFromMe {
+		from = evt.Info.Chat.String()
 	}
 
 	msg := IncomingMessage{
@@ -179,7 +189,8 @@ func (w *WhatsmeowProvider) handleMessage(evt *events.Message) {
 		// different numeric namespace than phone numbers — replying with just
 		// the bare user-part number (as if it were always a phone number) sends
 		// to a nonexistent account and the message silently never arrives.
-		From:      evt.Info.Sender.String(),
+		From:      from,
+		FromMe:    evt.Info.IsFromMe,
 		Timestamp: evt.Info.Timestamp.Unix(),
 		PushName:  evt.Info.PushName,
 		Type:      "unknown",

@@ -93,6 +93,9 @@ func (f *Forwarder) buildSimplePayload(msg provider.IncomingMessage) map[string]
 		"type":       msg.Type,
 		"message_id": msg.MessageID,
 		"timestamp":  fmt.Sprintf("%d", msg.Timestamp),
+		// Sempre presente, inclusive false: o consumidor precisa distinguir
+		// "nao veio de mim" de "campo ausente porque a versao e' antiga".
+		"from_me":    msg.FromMe,
 	}
 
 	if msg.PushName != "" {
