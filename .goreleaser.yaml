@@ -58,4 +58,4 @@ release:
   footer: |
     **Docker:** `docker pull ghcr.io/rafaeldourado9/arcanum:{{ .Version }}`
     **Install script (Linux/macOS):** `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh`
-    Verify downloads against `checksums.txt`. Guide: https://arcanum.rafaeldourado.tech
+    Verify downloads against `checksums.txt`. Guide: https://arcanum.rafaeldourado.tech/en/

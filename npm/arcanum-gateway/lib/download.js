@@ -16,7 +16,7 @@ function platform() {
   const osName = { linux: "linux", darwin: "darwin", win32: "windows" }[process.platform];
   const arch = { x64: "amd64", arm64: "arm64" }[process.arch];
   if (!osName || !arch) {
-    throw new Error(`Arcanum has no prebuilt binary for ${process.platform}/${process.arch}. Use Docker: https://arcanum.rafaeldourado.tech/installation/`);
+    throw new Error(`Arcanum has no prebuilt binary for ${process.platform}/${process.arch}. Use Docker: https://arcanum.rafaeldourado.tech/en/installation/`);
   }
   return { osName, arch, ext: osName === "windows" ? ".exe" : "" };
 }

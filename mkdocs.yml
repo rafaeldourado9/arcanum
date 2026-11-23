@@ -9,7 +9,7 @@ copyright: MIT License · Arcanum is not affiliated with WhatsApp or Meta.
 
 theme:
   name: material
-  language: en
+  language: pt
   logo: assets/logo.svg
   favicon: assets/logo.svg
   font:
@@ -65,11 +65,9 @@ plugins:
       reconfigure_material: true
       reconfigure_search: true
       languages:
-        - locale: en
-          default: true
-          name: English
-          build: true
+        # Portugues na raiz (/), ingles em /en/.
         - locale: pt
+          default: true
           name: Português (BR)
           build: true
           site_description: Gateway de WhatsApp open source e auto-hospedado em Go. Múltiplas sessões, anti-ban nativo e webhooks assinados.
@@ -97,6 +95,10 @@ plugins:
             Troubleshooting: Problemas comuns
             Reference: Referência
             API reference: Referência da API
+        - locale: en
+          name: English
+          build: true
+          site_description: Open-source, self-hosted WhatsApp gateway in Go. Multi-session, built-in anti-ban, signed webhooks.
 
 nav:
   - Home: index.md

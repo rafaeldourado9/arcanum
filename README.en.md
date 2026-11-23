@@ -18,9 +18,9 @@
 
 <p align="center">
   <a href="README.md"><b>Português (BR)</b></a> ·
-  <a href="https://arcanum.rafaeldourado.tech"><b>Documentation</b></a> ·
-  <a href="https://arcanum.rafaeldourado.tech/getting-started/">Getting started</a> ·
-  <a href="https://arcanum.rafaeldourado.tech/webhooks/">Webhooks</a> ·
+  <a href="https://arcanum.rafaeldourado.tech/en/"><b>Documentation</b></a> ·
+  <a href="https://arcanum.rafaeldourado.tech/en/getting-started/">Getting started</a> ·
+  <a href="https://arcanum.rafaeldourado.tech/en/webhooks/">Webhooks</a> ·
   <a href="SECURITY.md">Security</a>
 </p>
 
@@ -69,7 +69,7 @@
 | **systemd service** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh -s -- --systemd` |
 | **Binary** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
 
-Then open **http://localhost:3100**. Details: [Installation](https://arcanum.rafaeldourado.tech/installation/).
+Then open **http://localhost:3100**. Details: [Installation](https://arcanum.rafaeldourado.tech/en/installation/).
 
 ## Quick start
 
@@ -103,16 +103,16 @@ Have Node.js? **`npx arcanum-gateway`** runs it with no Docker and no install, a
 No Docker or Node? `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh` (add
 `-s -- --systemd` to install it as a service), or grab a binary for Linux, macOS or Windows
 from [Releases](https://github.com/rafaeldourado9/arcanum/releases). All options:
-[Installation](https://arcanum.rafaeldourado.tech/installation/).
+[Installation](https://arcanum.rafaeldourado.tech/en/installation/).
 
-**Learn by doing:** four short [tutorials](https://arcanum.rafaeldourado.tech/tutorials/)
-([em português](https://arcanum.rafaeldourado.tech/pt/tutorials/)) build a real bot from the
+**Learn by doing:** four short [tutorials](https://arcanum.rafaeldourado.tech/en/tutorials/)
+([em português](https://arcanum.rafaeldourado.tech/tutorials/)) build a real bot from the
 ready-made project in [`examples/faq-bot`](examples/faq-bot): automatic answers, human
 takeover, notifications from your system and moving servers.
 
 The full guide (sessions, every message type, webhook payloads with signature
 verification in Python, Node.js, Go and PHP, production setup with HTTPS, monitoring and
-troubleshooting) is at **[arcanum.rafaeldourado.tech](https://arcanum.rafaeldourado.tech)**,
+troubleshooting) is at **[arcanum.rafaeldourado.tech](https://arcanum.rafaeldourado.tech/en/)**,
 in English and Portuguese. The same pages live in [`docs/`](docs/) in this repository.
 
 ## Features
@@ -143,7 +143,7 @@ Everything is set through environment variables. The essentials:
 | `GATEWAY_DASHBOARD_PASSWORD` | | Dashboard password (without it, sign in with the API key). |
 
 See [`.env.example`](.env.example) and the
-[configuration reference](https://arcanum.rafaeldourado.tech/configuration/).
+[configuration reference](https://arcanum.rafaeldourado.tech/en/configuration/).
 
 ## Development
 

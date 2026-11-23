@@ -1,3 +1,4 @@
+import { docsUrl } from "../api";
 import { useTheme } from "../hooks";
 import { useI18n } from "../i18n";
 import { Icon, type IconName } from "../icons";
@@ -9,7 +10,7 @@ export default function SettingsPage({ version }: { version: string }) {
 
   const links: { href: string; label: string; icon: IconName }[] = [
     { href: "/docs", label: t("apiDocs"), icon: "terminal" },
-    { href: lang === "pt" ? "https://arcanum.rafaeldourado.tech/pt/" : "https://arcanum.rafaeldourado.tech", label: t("guide"), icon: "book" },
+    { href: docsUrl(lang), label: t("guide"), icon: "book" },
     { href: "https://github.com/rafaeldourado9/arcanum", label: t("repo"), icon: "globe" },
   ];
 

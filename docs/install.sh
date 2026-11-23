@@ -88,7 +88,7 @@ if [ "$SYSTEMD" -eq 0 ]; then
   say "Start it:"
   say "  GATEWAY_API_KEY=\"\$(openssl rand -hex 32)\" GATEWAY_DB_PATH=\$HOME/.arcanum arcanum"
   say "Then open http://localhost:3100 (dashboard) and http://localhost:3100/docs (API)."
-  say "Run as a service: re-run with --systemd. Guide: https://arcanum.rafaeldourado.tech"
+  say "Run as a service: re-run with --systemd. Guide: https://arcanum.rafaeldourado.tech/en/"
   exit 0
 fi
 
@@ -106,7 +106,7 @@ if [ ! -f /etc/arcanum/arcanum.env ]; then
   key="$(rand)"
   pass="$(rand | cut -c1-24)"
   $SUDO sh -c "umask 077; cat > /etc/arcanum/arcanum.env" <<EOF
-# Arcanum configuration. Reference: https://arcanum.rafaeldourado.tech/configuration/
+# Arcanum configuration. Reference: https://arcanum.rafaeldourado.tech/en/configuration/
 GATEWAY_API_KEY=$key
 GATEWAY_DASHBOARD_PASSWORD=$pass
 GATEWAY_DB_PATH=/var/lib/arcanum

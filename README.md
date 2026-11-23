@@ -18,10 +18,10 @@
 
 <p align="center">
   <a href="README.en.md">English</a> ·
-  <a href="https://arcanum.rafaeldourado.tech/pt/"><b>Documentação</b></a> ·
-  <a href="https://arcanum.rafaeldourado.tech/pt/getting-started/">Primeiros passos</a> ·
-  <a href="https://arcanum.rafaeldourado.tech/pt/tutorials/">Treinamento</a> ·
-  <a href="https://arcanum.rafaeldourado.tech/pt/webhooks/">Webhooks</a> ·
+  <a href="https://arcanum.rafaeldourado.tech/"><b>Documentação</b></a> ·
+  <a href="https://arcanum.rafaeldourado.tech/getting-started/">Primeiros passos</a> ·
+  <a href="https://arcanum.rafaeldourado.tech/tutorials/">Treinamento</a> ·
+  <a href="https://arcanum.rafaeldourado.tech/webhooks/">Webhooks</a> ·
   <a href="SECURITY.md">Segurança</a>
 </p>
 
@@ -70,7 +70,7 @@
 | **Serviço do systemd** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh -s -- --systemd` |
 | **Binário** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
 
-Depois abra **http://localhost:3100**. Detalhes: [Instalação](https://arcanum.rafaeldourado.tech/pt/installation/).
+Depois abra **http://localhost:3100**. Detalhes: [Instalação](https://arcanum.rafaeldourado.tech/installation/).
 
 ## Começo rápido
 
@@ -104,15 +104,15 @@ Tem Node.js? **`npx arcanum-gateway`** roda o gateway sem Docker e sem instalar 
 Sem Docker nem Node? `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh` (acrescente
 `-s -- --systemd` para instalar como serviço), ou baixe um binário para Linux, macOS ou Windows
 nas [Releases](https://github.com/rafaeldourado9/arcanum/releases). Todas as opções:
-[Instalação](https://arcanum.rafaeldourado.tech/pt/installation/).
+[Instalação](https://arcanum.rafaeldourado.tech/installation/).
 
-**Aprenda fazendo:** quatro aulas curtas de [treinamento](https://arcanum.rafaeldourado.tech/pt/tutorials/)
+**Aprenda fazendo:** quatro aulas curtas de [treinamento](https://arcanum.rafaeldourado.tech/tutorials/)
 montam um bot de verdade a partir do projeto pronto em [`examples/faq-bot`](examples/faq-bot):
 respostas automáticas, atendimento humano, avisos pelo seu sistema e troca de servidor.
 
 O guia completo (sessões, todos os tipos de mensagem, formatos do webhook com verificação de
 assinatura em Python, Node.js, Go e PHP, produção com HTTPS, monitoramento e problemas comuns)
-está em **[arcanum.rafaeldourado.tech/pt](https://arcanum.rafaeldourado.tech/pt/)**. As mesmas
+está em **[arcanum.rafaeldourado.tech/pt](https://arcanum.rafaeldourado.tech/)**. As mesmas
 páginas ficam em [`docs/pt/`](docs/pt/) neste repositório.
 
 ## Recursos
@@ -143,7 +143,7 @@ Tudo é configurado por variáveis de ambiente. O essencial:
 | `GATEWAY_DASHBOARD_PASSWORD` | | Senha do painel (sem ela, o login usa a chave de API). |
 
 Veja o [`.env.example`](.env.example) e a
-[referência de configuração](https://arcanum.rafaeldourado.tech/pt/configuration/).
+[referência de configuração](https://arcanum.rafaeldourado.tech/configuration/).
 
 ## Desenvolvimento
 

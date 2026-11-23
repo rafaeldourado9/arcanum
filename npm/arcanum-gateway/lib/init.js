@@ -32,7 +32,7 @@ volumes:
 const random = (bytes) => crypto.randomBytes(bytes).toString("hex");
 
 function env() {
-  return `# Arcanum configuration. Reference: https://arcanum.rafaeldourado.tech/configuration/
+  return `# Arcanum configuration. Reference: https://arcanum.rafaeldourado.tech/en/configuration/
 # Keep this file private: it controls your WhatsApp numbers.
 GATEWAY_API_KEY=${random(32)}
 GATEWAY_DASHBOARD_PASSWORD=${random(12)}
@@ -52,9 +52,9 @@ const README = `# Arcanum
 Your app calls the API with the header \`X-Api-Key: <GATEWAY_API_KEY>\` and verifies webhooks
 with GATEWAY_META_APP_SECRET.
 
-- Guide: https://arcanum.rafaeldourado.tech
-- Tutorials: https://arcanum.rafaeldourado.tech/tutorials/
-- Before exposing it to the internet: https://arcanum.rafaeldourado.tech/deployment/
+- Guide: https://arcanum.rafaeldourado.tech/en/
+- Tutorials: https://arcanum.rafaeldourado.tech/en/tutorials/
+- Before exposing it to the internet: https://arcanum.rafaeldourado.tech/en/deployment/
 `;
 
 function init(target = "arcanum", log = console.log) {
@@ -77,7 +77,7 @@ function init(target = "arcanum", log = console.log) {
   log("  docker compose up -d");
   log("  open http://localhost:3100   (password: GATEWAY_DASHBOARD_PASSWORD in .env)\n");
   log("No Docker? Run it directly: npx arcanum-gateway");
-  log("Guide: https://arcanum.rafaeldourado.tech\n");
+  log("Guide: https://arcanum.rafaeldourado.tech/en/\n");
   return dir;
 }
 

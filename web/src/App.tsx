@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { api, setUnauthorizedHandler } from "./api";
+import { api, docsUrl, setUnauthorizedHandler } from "./api";
 import { type Dict, useI18n } from "./i18n";
 import { Icon, type IconName } from "./icons";
 import { Spinner } from "./ui";
@@ -77,7 +77,7 @@ const NAV: { to: string; label: keyof Dict; icon: IconName; end?: boolean }[] = 
 ];
 
 function Layout({ version, onSignOut }: { version: string; onSignOut: () => void }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   useEffect(() => setMenuOpen(false), [location.pathname]);
@@ -115,7 +115,7 @@ function Layout({ version, onSignOut }: { version: string; onSignOut: () => void
         ))}
         <li>
           <a
-            href="https://arcanum.rafaeldourado.tech"
+            href={docsUrl(lang)}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-3 hover:text-fg"

@@ -166,3 +166,8 @@ export function streamLogs(onEntry: (e: LogEntry) => void, signal: AbortSignal):
     }
   });
 }
+
+/** Guia no idioma do painel: portugues na raiz do site, ingles em /en/. */
+export function docsUrl(lang: "en" | "pt") {
+  return lang === "pt" ? "https://arcanum.rafaeldourado.tech/" : "https://arcanum.rafaeldourado.tech/en/";
+}
