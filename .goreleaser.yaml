@@ -34,6 +34,11 @@ archives:
       - README.md
       - .env.example
       - deploy/systemd/arcanum.service
+  # Binario cru (sem compactar), usado pelo `npx arcanum-gateway`: o Node baixa e roda
+  # sem precisar extrair .tar.gz/.zip. Entra no checksums.txt como os demais.
+  - id: raw
+    formats: [binary]
+    name_template: "arcanum_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
 checksum:
   name_template: checksums.txt

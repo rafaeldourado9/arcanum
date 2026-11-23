@@ -65,6 +65,10 @@ Foco: segurança e confiabilidade. **Mudança incompatível:** toda rota agora e
 - Imagem distroless (34 MB, sem shell), usuário nonroot (UID 65532), funciona somente leitura;
   comandos `arcanum healthcheck` e `arcanum version`.
 - `deploy/`: Compose local, Compose com HTTPS (Caddy), manifesto do Kubernetes, unit do systemd.
+- `npx arcanum-gateway` (pacote npm sem dependências: baixa o binário cru da release, confere o
+  SHA-256 e roda; cache em `~/.arcanum`) e `npm create arcanum` (projeto Compose com chaves
+  geradas). Publicados no npm a cada tag, com proveniência.
+- Treinamento com 4 aulas e projeto de exemplo `examples/faq-bot` (bot em Python com testes).
 - **Atualizando da 1.0:** o volume de dados precisa passar para o UID 65532
   (`docker run --rm -v arcanum-data:/data alpine chown -R 65532:65532 /data`).
 

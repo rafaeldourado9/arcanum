@@ -5,6 +5,17 @@ mensagem enviada.
 
 ## 1. Rode o Arcanum
 
+=== "npx"
+
+    ```bash
+    export ARCANUM_KEY="$(openssl rand -hex 32)"
+    echo "Sua chave de API: $ARCANUM_KEY"
+
+    GATEWAY_API_KEY="$ARCANUM_KEY" npx arcanum-gateway
+    ```
+
+    Precisa de Node.js 18+. Baixa o binário uma vez (com checksum conferido) e roda.
+
 === "Docker"
 
     ```bash

@@ -1,0 +1,23 @@
+{
+  "name": "create-arcanum",
+  "version": "0.0.0-dev",
+  "description": "Create an Arcanum WhatsApp gateway project (Docker Compose + generated keys): npm create arcanum",
+  "keywords": ["whatsapp", "whatsapp-api", "whatsapp-gateway", "create", "scaffold"],
+  "homepage": "https://arcanum.rafaeldourado.tech",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafaeldourado9/arcanum.git",
+    "directory": "npm/create-arcanum"
+  },
+  "license": "MIT",
+  "bin": {
+    "create-arcanum": "index.js"
+  },
+  "files": ["index.js"],
+  "dependencies": {
+    "arcanum-gateway": "0.0.0-dev"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

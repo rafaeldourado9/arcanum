@@ -5,6 +5,7 @@ o seu servidor; todos rodam a mesma coisa.
 
 | Jeito | Melhor para |
 |---|---|
+| [npx](#npx-nodejs) | Quem tem Node.js: um comando, mais nada para instalar. |
 | [Docker](#docker) | A maioria dos casos. Um comando, atualização fácil. |
 | [Script de instalação](#script-de-instalacao-linux-macos) | Linux ou macOS sem Docker. |
 | [Serviço do systemd](#servico-do-systemd) | Servidor Linux, sobe no boot, protegido. |
@@ -14,6 +15,31 @@ o seu servidor; todos rodam a mesma coisa.
 
 Seja qual for, abra **`http://<servidor>:3100`** para o [painel](dashboard.md) e **`/docs`**
 para a API interativa.
+
+## npx (Node.js)
+
+O jeito mais rápido se você tem Node.js 18+. Sem Docker, sem dependências:
+
+```bash
+npx arcanum-gateway
+```
+
+Na primeira vez ele baixa o binário do seu sistema da release do GitHub, **confere o SHA-256**
+contra o `checksums.txt` e guarda em `~/.arcanum/`. O painel abre em `http://localhost:3100`;
+as sessões ficam em `~/.arcanum/data`. Defina suas chaves como em qualquer instalação:
+
+```bash
+GATEWAY_API_KEY="$(openssl rand -hex 32)" GATEWAY_DASHBOARD_PASSWORD="uma-senha-longa" npx arcanum-gateway
+```
+
+Para começar um projeto com Docker Compose, com as chaves já geradas:
+
+```bash
+npm create arcanum            # cria ./arcanum com compose.yaml e um .env privado
+cd arcanum && docker compose up -d
+```
+
+`ARCANUM_VERSION=v1.1.0` fixa uma versão; `ARCANUM_HOME` muda onde ficam binários e dados.
 
 ## Docker
 

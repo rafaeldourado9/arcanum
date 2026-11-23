@@ -55,8 +55,8 @@
   in the browser, light and dark, English and Portuguese.
 - **Secure by default**: API key on every route, password-protected dashboard, SSRF-safe
   webhooks, no personal data in logs, distroless non-root image, vulnerability scans in CI.
-- **Installs anywhere**: Docker, a one-line script, systemd, Kubernetes, or a single binary
-  for Linux, macOS and Windows.
+- **Installs anywhere**: `npx`, Docker, a one-line script, systemd, Kubernetes, or a single
+  binary for Linux, macOS and Windows.
 
 ## Quick start
 
@@ -84,7 +84,10 @@ curl -X POST localhost:3100/api/message/sendText/sales \
 
 Open **http://localhost:3100** for the dashboard, or **/docs** for the interactive API.
 
-No Docker? `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh` (add
+Have Node.js? **`npx arcanum-gateway`** runs it with no Docker and no install, and
+**`npm create arcanum`** scaffolds a Compose project with generated keys.
+
+No Docker or Node? `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh` (add
 `-s -- --systemd` to install it as a service), or grab a binary for Linux, macOS or Windows
 from [Releases](https://github.com/rafaeldourado9/arcanum/releases). All options:
 [Installation](https://arcanum.rafaeldourado.tech/installation/).

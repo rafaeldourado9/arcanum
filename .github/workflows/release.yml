@@ -43,6 +43,40 @@ jobs:
         with:
           subject-path: "dist/*.tar.gz, dist/*.zip, dist/checksums.txt"
 
+  npm:
+    # Depois dos binarios: o `npx arcanum-gateway` baixa o binario cru desta release.
+    needs: binaries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Set version from tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          v="${TAG#v}"
+          cd npm/arcanum-gateway && npm version "$v" --no-git-tag-version && cd ../..
+          cd npm/create-arcanum && npm version "$v" --no-git-tag-version
+          npm pkg set "dependencies.arcanum-gateway=$v"
+      - name: Publish arcanum-gateway
+        working-directory: npm/arcanum-gateway
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish create-arcanum
+        working-directory: npm/create-arcanum
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   image:
     runs-on: ubuntu-latest
     permissions:
