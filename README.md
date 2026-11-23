@@ -17,8 +17,8 @@
 </p>
 
 <p align="center">
+  <a href="README.pt-BR.md"><b>Português (BR)</b></a> ·
   <a href="https://arcanum.rafaeldourado.tech"><b>Documentation</b></a> ·
-  <a href="https://arcanum.rafaeldourado.tech/pt/"><b>Documentação em português</b></a> ·
   <a href="https://arcanum.rafaeldourado.tech/getting-started/">Getting started</a> ·
   <a href="https://arcanum.rafaeldourado.tech/webhooks/">Webhooks</a> ·
   <a href="SECURITY.md">Security</a>
@@ -57,6 +57,19 @@
   webhooks, no personal data in logs, distroless non-root image, vulnerability scans in CI.
 - **Installs anywhere**: `npx`, Docker, a one-line script, systemd, Kubernetes, or a single
   binary for Linux, macOS and Windows.
+
+## Install
+
+| | Command |
+|---|---|
+| **npx** (Node.js 18+) | `npx arcanum-gateway` |
+| **New project** (Compose + generated keys) | `npm create arcanum` |
+| **Docker** | `docker run -p 3100:3100 -v arcanum-data:/data ghcr.io/rafaeldourado9/arcanum` |
+| **Linux / macOS script** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh` |
+| **systemd service** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh -s -- --systemd` |
+| **Binary** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
+
+Then open **http://localhost:3100**. Details: [Installation](https://arcanum.rafaeldourado.tech/installation/).
 
 ## Quick start
 
