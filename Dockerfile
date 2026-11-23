@@ -9,7 +9,7 @@ COPY web/ ./
 RUN npm run build
 
 # 2) Gateway em Go puro (sem CGO: o SQLite e o modernc), com o painel embutido
-FROM golang:1.26-alpine AS builder
+FROM golang:1.27-alpine AS builder
 WORKDIR /src
 # Dependencias primeiro (cache) e exatamente as do go.sum: build reprodutivel.
 COPY go.mod go.sum ./
