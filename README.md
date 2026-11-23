@@ -5,172 +5,172 @@
 <h1 align="center">Arcanum</h1>
 
 <p align="center">
-  <strong>Open-source, self-hosted WhatsApp gateway in Go.</strong><br>
-  Multi-session, built-in anti-ban, signed webhooks and a web dashboard. One static binary, no browser, no Node.
+  <strong>Gateway de WhatsApp open source e auto-hospedado, em Go.</strong><br>
+  Várias sessões, anti-ban nativo, webhooks assinados e painel web. Um único binário, sem navegador, sem Node.
 </p>
 
 <p align="center">
   <a href="https://github.com/rafaeldourado9/arcanum/actions/workflows/ci.yml"><img src="https://github.com/rafaeldourado9/arcanum/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/rafaeldourado9/arcanum/releases"><img src="https://img.shields.io/github/v/release/rafaeldourado9/arcanum?sort=semver" alt="Release"></a>
+  <a href="https://github.com/rafaeldourado9/arcanum/releases"><img src="https://img.shields.io/github/v/release/rafaeldourado9/arcanum?sort=semver" alt="Versão"></a>
   <img src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-black.svg" alt="MIT"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-black.svg" alt="MIT"></a>
 </p>
 
 <p align="center">
-  <a href="README.pt-BR.md"><b>Português (BR)</b></a> ·
-  <a href="https://arcanum.rafaeldourado.tech"><b>Documentation</b></a> ·
-  <a href="https://arcanum.rafaeldourado.tech/getting-started/">Getting started</a> ·
-  <a href="https://arcanum.rafaeldourado.tech/webhooks/">Webhooks</a> ·
-  <a href="SECURITY.md">Security</a>
+  <a href="README.en.md">English</a> ·
+  <a href="https://arcanum.rafaeldourado.tech/pt/"><b>Documentação</b></a> ·
+  <a href="https://arcanum.rafaeldourado.tech/pt/getting-started/">Primeiros passos</a> ·
+  <a href="https://arcanum.rafaeldourado.tech/pt/tutorials/">Treinamento</a> ·
+  <a href="https://arcanum.rafaeldourado.tech/pt/webhooks/">Webhooks</a> ·
+  <a href="SECURITY.md">Segurança</a>
 </p>
 
 ---
 
 <p align="center">
-  <img src="docs/assets/screenshots/overview.jpg" alt="Arcanum dashboard: overview" width="880">
+  <img src="docs/assets/screenshots/overview.jpg" alt="Painel do Arcanum: visão geral" width="880">
 </p>
 
 <table>
   <tr>
-    <td><img src="docs/assets/screenshots/connect-qr.jpg" alt="Connect a number with the QR code"></td>
-    <td><img src="docs/assets/screenshots/session.jpg" alt="Session page with webhook test and deliveries"></td>
+    <td><img src="docs/assets/screenshots/connect-qr.jpg" alt="Conectar um número pelo QR code"></td>
+    <td><img src="docs/assets/screenshots/session.jpg" alt="Página da sessão com teste de webhook e entregas"></td>
   </tr>
   <tr>
-    <td><img src="docs/assets/screenshots/logs.jpg" alt="Live logs"></td>
-    <td><img src="docs/assets/screenshots/overview-dark.jpg" alt="Dark theme"></td>
+    <td><img src="docs/assets/screenshots/logs.jpg" alt="Logs ao vivo"></td>
+    <td><img src="docs/assets/screenshots/overview-dark.jpg" alt="Tema escuro"></td>
   </tr>
 </table>
 
-## Why Arcanum
+## Por que o Arcanum
 
-- **Light**: a single Go binary on [whatsmeow](https://github.com/tulir/whatsmeow). Starts in
-  milliseconds, small memory footprint, runs on a Raspberry Pi.
-- **Anti-ban built in**: typing indicator sized to the message, human-like delay, per-minute
-  limit and one message at a time per chat, on every send.
-- **Many numbers, one API**: each session has its own webhook, settings and rate limit, and
-  survives restarts.
-- **Webhooks you can trust**: HMAC-SHA256 signatures, Meta Cloud API compatible format or a
-  simple flat one, and a `fromMe` flag for human takeover.
-- **Dashboard included**: manage sessions, scan QR codes, test webhooks and watch live logs
-  in the browser, light and dark, English and Portuguese.
-- **Secure by default**: API key on every route, password-protected dashboard, SSRF-safe
-  webhooks, no personal data in logs, distroless non-root image, vulnerability scans in CI.
-- **Installs anywhere**: `npx`, Docker, a one-line script, systemd, Kubernetes, or a single
-  binary for Linux, macOS and Windows.
+- **Leve**: um único binário Go sobre a [whatsmeow](https://github.com/tulir/whatsmeow). Sobe em
+  milissegundos, usa pouca memória, roda até num Raspberry Pi.
+- **Anti-ban nativo**: "digitando..." proporcional ao tamanho da mensagem, pausa humana, limite
+  por minuto e uma mensagem por vez em cada conversa, em todo envio.
+- **Vários números, uma API**: cada sessão tem seu webhook, suas configurações e seu limite, e
+  sobrevive a reinícios.
+- **Webhooks confiáveis**: assinatura HMAC-SHA256, formato compatível com a Cloud API da Meta ou
+  um formato simples, e o campo `fromMe` para o atendimento humano.
+- **Painel incluso**: gerencie sessões, leia QR codes, teste webhooks e acompanhe os logs ao vivo
+  pelo navegador, em tema claro e escuro, em português e inglês.
+- **Seguro por padrão**: chave de API em toda rota, painel com senha, webhooks protegidos contra
+  SSRF, nenhum dado pessoal no log, imagem distroless sem root, varredura de vulnerabilidades no CI.
+- **Instala em qualquer lugar**: `npx`, Docker, script de uma linha, systemd, Kubernetes ou um
+  binário para Linux, macOS e Windows.
 
-## Install
+## Instalação
 
-| | Command |
+| | Comando |
 |---|---|
 | **npx** (Node.js 18+) | `npx arcanum-gateway` |
-| **New project** (Compose + generated keys) | `npm create arcanum` |
+| **Projeto novo** (Compose + chaves geradas) | `npm create arcanum` |
 | **Docker** | `docker run -p 3100:3100 -v arcanum-data:/data ghcr.io/rafaeldourado9/arcanum` |
-| **Linux / macOS script** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh` |
-| **systemd service** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh -s -- --systemd` |
-| **Binary** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
+| **Script Linux / macOS** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh` |
+| **Serviço do systemd** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh -s -- --systemd` |
+| **Binário** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
 
-Then open **http://localhost:3100**. Details: [Installation](https://arcanum.rafaeldourado.tech/installation/).
+Depois abra **http://localhost:3100**. Detalhes: [Instalação](https://arcanum.rafaeldourado.tech/pt/installation/).
 
-## Quick start
+## Começo rápido
 
 ```bash
 export ARCANUM_KEY="$(openssl rand -hex 32)"
 
 docker run -d --name arcanum -p 3100:3100 \
   -e GATEWAY_API_KEY="$ARCANUM_KEY" \
-  -e GATEWAY_DASHBOARD_PASSWORD="choose-a-long-password" \
+  -e GATEWAY_DASHBOARD_PASSWORD="escolha-uma-senha-longa" \
   -v arcanum-data:/data \
   ghcr.io/rafaeldourado9/arcanum:latest
 
-# open http://localhost:3100 for the dashboard, or use the API:
-# create a session and get the QR code
+# abra http://localhost:3100 para o painel, ou use a API:
+# crie uma sessão e pegue o QR code
 curl -X POST localhost:3100/api/instance/create \
   -H "X-Api-Key: $ARCANUM_KEY" -H "Content-Type: application/json" \
-  -d '{"instanceName": "sales"}'
-curl -H "X-Api-Key: $ARCANUM_KEY" "localhost:3100/api/instance/connect/sales?format=png" -o qr.png
+  -d '{"instanceName": "vendas"}'
+curl -H "X-Api-Key: $ARCANUM_KEY" "localhost:3100/api/instance/connect/vendas?format=png" -o qr.png
 
-# after scanning qr.png in WhatsApp > Linked devices:
-curl -X POST localhost:3100/api/message/sendText/sales \
+# depois de ler o qr.png em WhatsApp > Aparelhos conectados:
+curl -X POST localhost:3100/api/message/sendText/vendas \
   -H "X-Api-Key: $ARCANUM_KEY" -H "Content-Type: application/json" \
-  -d '{"number": "5511999999999", "text": "Hello from Arcanum!"}'
+  -d '{"number": "5511999999999", "text": "Olá, aqui é o Arcanum!"}'
 ```
 
-Open **http://localhost:3100** for the dashboard, or **/docs** for the interactive API.
+Abra **http://localhost:3100** para o painel, ou **/docs** para a API interativa.
 
-Have Node.js? **`npx arcanum-gateway`** runs it with no Docker and no install, and
-**`npm create arcanum`** scaffolds a Compose project with generated keys.
+Tem Node.js? **`npx arcanum-gateway`** roda o gateway sem Docker e sem instalar nada, e
+**`npm create arcanum`** cria um projeto Compose com as chaves já geradas.
 
-No Docker or Node? `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh` (add
-`-s -- --systemd` to install it as a service), or grab a binary for Linux, macOS or Windows
-from [Releases](https://github.com/rafaeldourado9/arcanum/releases). All options:
-[Installation](https://arcanum.rafaeldourado.tech/installation/).
+Sem Docker nem Node? `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh` (acrescente
+`-s -- --systemd` para instalar como serviço), ou baixe um binário para Linux, macOS ou Windows
+nas [Releases](https://github.com/rafaeldourado9/arcanum/releases). Todas as opções:
+[Instalação](https://arcanum.rafaeldourado.tech/pt/installation/).
 
-**Learn by doing:** four short [tutorials](https://arcanum.rafaeldourado.tech/tutorials/)
-([em português](https://arcanum.rafaeldourado.tech/pt/tutorials/)) build a real bot from the
-ready-made project in [`examples/faq-bot`](examples/faq-bot): automatic answers, human
-takeover, notifications from your system and moving servers.
+**Aprenda fazendo:** quatro aulas curtas de [treinamento](https://arcanum.rafaeldourado.tech/pt/tutorials/)
+montam um bot de verdade a partir do projeto pronto em [`examples/faq-bot`](examples/faq-bot):
+respostas automáticas, atendimento humano, avisos pelo seu sistema e troca de servidor.
 
-The full guide (sessions, every message type, webhook payloads with signature
-verification in Python, Node.js, Go and PHP, production setup with HTTPS, monitoring and
-troubleshooting) is at **[arcanum.rafaeldourado.tech](https://arcanum.rafaeldourado.tech)**,
-in English and Portuguese. The same pages live in [`docs/`](docs/) in this repository.
+O guia completo (sessões, todos os tipos de mensagem, formatos do webhook com verificação de
+assinatura em Python, Node.js, Go e PHP, produção com HTTPS, monitoramento e problemas comuns)
+está em **[arcanum.rafaeldourado.tech/pt](https://arcanum.rafaeldourado.tech/pt/)**. As mesmas
+páginas ficam em [`docs/pt/`](docs/pt/) neste repositório.
 
-## Features
+## Recursos
 
 | | |
 |---|---|
-| Sessions | QR code (JSON or PNG) or pairing code, auto-reconnect, persisted across restarts |
-| Messages | Text, image, audio, video, document, location, contact, reaction, poll |
-| Chat | Read receipts, number lookup, profile name, about and photo |
-| Webhooks | `simple` or `meta` format, HMAC signature, typing and send-failure events, `fromMe` |
-| Dashboard | Sessions and QR codes, webhook test and delivery history, export/import, live logs |
-| Operations | `/health`, Prometheus `/metrics`, JSON logs, graceful shutdown, health check |
-| Security | API key, SSRF protection, request limits, security headers, non-root image |
+| Sessões | QR code (JSON ou PNG) ou código de pareamento, reconexão automática, persistem entre reinícios |
+| Mensagens | Texto, imagem, áudio, vídeo, documento, localização, contato, reação, enquete |
+| Conversa | Confirmação de leitura, consulta de número, nome, recado e foto do perfil |
+| Webhooks | Formato `simple` ou `meta`, assinatura HMAC, eventos de digitação e de falha de envio, `fromMe` |
+| Painel | Sessões e QR codes, teste e histórico de webhooks, exportar/importar, logs ao vivo |
+| Operação | `/health`, `/metrics` do Prometheus, logs em JSON, desligamento limpo, checagem de saúde |
+| Segurança | Chave de API, proteção contra SSRF, limite de pedidos, cabeçalhos de segurança, imagem sem root |
 
-On the roadmap: per-event webhook filtering and retries, message store
-(`findChats`, `findMessages`), groups, and official SDKs for Python, Node.js and Go.
+No roadmap: filtro por evento e reenvio de webhooks, armazenamento de mensagens
+(`findChats`, `findMessages`), grupos e SDKs oficiais para Python, Node.js e Go.
 
-## Configuration
+## Configuração
 
-Everything is set through environment variables. The essentials:
+Tudo é configurado por variáveis de ambiente. O essencial:
 
-| Variable | Default | |
+| Variável | Padrão | |
 |---|---|---|
-| `GATEWAY_API_KEY` | generated | Required key. Use `openssl rand -hex 32`. |
-| `GATEWAY_WEBHOOK_FORWARD_URL` | | Webhook for every session (`{instance}` is replaced). |
-| `GATEWAY_META_APP_SECRET` | | HMAC secret for webhook signatures. |
-| `GATEWAY_WEBHOOK_FORMAT` | `simple` | `simple` or `meta`. |
-| `GATEWAY_DASHBOARD_PASSWORD` | | Dashboard password (without it, sign in with the API key). |
+| `GATEWAY_API_KEY` | gerada | Chave obrigatória. Use `openssl rand -hex 32`. |
+| `GATEWAY_WEBHOOK_FORWARD_URL` | | Webhook de todas as sessões (`{instance}` é trocado pelo nome). |
+| `GATEWAY_META_APP_SECRET` | | Segredo do HMAC que assina os webhooks. |
+| `GATEWAY_WEBHOOK_FORMAT` | `simple` | `simple` ou `meta`. |
+| `GATEWAY_DASHBOARD_PASSWORD` | | Senha do painel (sem ela, o login usa a chave de API). |
 
-See [`.env.example`](.env.example) and the
-[configuration reference](https://arcanum.rafaeldourado.tech/configuration/).
+Veja o [`.env.example`](.env.example) e a
+[referência de configuração](https://arcanum.rafaeldourado.tech/pt/configuration/).
 
-## Development
+## Desenvolvimento
 
 ```bash
-go test ./...                         # Go 1.26+, no C compiler needed (pure-Go SQLite)
-(cd web && npm ci && npm run build)   # dashboard, embedded into the binary
+go test ./...                         # Go 1.26+, sem compilador C (SQLite em Go puro)
+(cd web && npm ci && npm run build)   # painel, embutido no binário
 go run ./cmd/gateway
 ```
 
-No Go installed? Run the tests in Docker:
+Sem Go instalado? Rode os testes no Docker:
 
 ```bash
 docker run --rm -v "$PWD":/src -w /src golang:1.26-alpine go test ./...
 ```
 
-Docs preview: `pip install -r requirements-docs.txt && mkdocs serve`.
+Prévia da documentação: `pip install -r requirements-docs.txt && mkdocs serve`.
 
-Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues
-privately as described in [SECURITY.md](SECURITY.md).
+Contribuições são bem-vindas: veja o [CONTRIBUTING.md](CONTRIBUTING.md). Falhas de segurança
+devem ser reportadas em privado, como explica o [SECURITY.md](SECURITY.md).
 
-## Disclaimer
+## Aviso
 
-Arcanum is not affiliated with, endorsed by or connected to WhatsApp or Meta. It uses the
-same protocol as WhatsApp Web. Automated messaging can get numbers banned: follow
-[WhatsApp's terms](https://www.whatsapp.com/legal/terms-of-service) and only message
-people who expect to hear from you.
+O Arcanum não tem vínculo, aprovação ou ligação com o WhatsApp ou a Meta. Ele usa o mesmo
+protocolo do WhatsApp Web. Mensagens automáticas podem levar ao banimento do número: siga os
+[termos do WhatsApp](https://www.whatsapp.com/legal/terms-of-service) e fale só com quem espera
+o seu contato.
 
-## License
+## Licença
 
 [MIT](LICENSE)
