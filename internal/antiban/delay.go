@@ -34,6 +34,7 @@ func randBetween(min, max int) int {
 	if max <= min {
 		return min
 	}
+	// #nosec G404 -- jitter do anti-ban (atraso humano entre mensagens); previsibilidade aqui nao tem impacto de seguranca
 	return min + rand.Intn(max-min+1)
 }
 

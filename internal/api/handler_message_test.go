@@ -31,14 +31,18 @@ func (f *fakeProvider) attemptCount() int {
 	return f.attempts
 }
 
-func (f *fakeProvider) Name() string                      { return "fake" }
-func (f *fakeProvider) Connect() error                    { return nil }
-func (f *fakeProvider) Disconnect() error                 { return nil }
-func (f *fakeProvider) Status() provider.ConnectionStatus { return provider.StatusConnected }
-func (f *fakeProvider) QRCode() string                    { return "" }
-func (f *fakeProvider) SendPresence(string, string) error { return nil }
-func (f *fakeProvider) MarkAsRead(string, string) error   { return nil }
-func (f *fakeProvider) OnMessage(provider.MessageHandler) {}
+func (f *fakeProvider) Name() string                        { return "fake" }
+func (f *fakeProvider) Connect() error                      { return nil }
+func (f *fakeProvider) Disconnect() error                   { return nil }
+func (f *fakeProvider) Close() error                        { return nil }
+func (f *fakeProvider) Unlink() error                       { return nil }
+func (f *fakeProvider) PhoneNumber() string                 { return "" }
+func (f *fakeProvider) Status() provider.ConnectionStatus   { return provider.StatusConnected }
+func (f *fakeProvider) QRCode() string                      { return "" }
+func (f *fakeProvider) SendPresence(string, string) error   { return nil }
+func (f *fakeProvider) MarkAsRead(string, string) error     { return nil }
+func (f *fakeProvider) OnMessage(provider.MessageHandler)   {}
+func (f *fakeProvider) OnPresence(provider.PresenceHandler) {}
 func (f *fakeProvider) CheckNumbers([]string) ([]provider.NumberCheck, error) {
 	return nil, nil
 }
@@ -83,6 +87,7 @@ var errTransient = errors.New("transient send failure")
 func newTestServer(t *testing.T, fp *fakeProvider) (http.Handler, *instance.Manager) {
 	t.Helper()
 
+	// Sem MaxBodyMB: o servidor cai no padrao (64 MB) em vez de recusar tudo.
 	cfg := &config.Config{
 		DBPath: t.TempDir(),
 		// Anti-ban delay deliberately well above the response-time assertion's
@@ -94,6 +99,7 @@ func newTestServer(t *testing.T, fp *fakeProvider) (http.Handler, *instance.Mana
 		MaxTypingMs:      1500,
 		MsPerChar:        50,
 		RateLimitPerMin:  100,
+		APIKey:           testAPIKey,
 	}
 
 	mgr := instance.NewManager(cfg)
@@ -119,6 +125,7 @@ func TestSendTextRespondsBeforeAntiBanDelayCompletes(t *testing.T) {
 
 	body := strings.NewReader(`{"number":"5511999999999","text":"hi"}`)
 	req := httptest.NewRequest(http.MethodPost, "/api/message/sendText/test", body)
+	req.Header.Set("X-Api-Key", testAPIKey)
 	rec := httptest.NewRecorder()
 
 	start := time.Now()
@@ -161,6 +168,7 @@ func TestSendTextRetriesTransientFailures(t *testing.T) {
 
 	body := strings.NewReader(`{"number":"5511999999999","text":"hi"}`)
 	req := httptest.NewRequest(http.MethodPost, "/api/message/sendText/test", body)
+	req.Header.Set("X-Api-Key", testAPIKey)
 	rec := httptest.NewRecorder()
 	server.ServeHTTP(rec, req)
 

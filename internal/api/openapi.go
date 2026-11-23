@@ -1,247 +1,186 @@
 package api
 
-var fullOpenAPISpec = map[string]any{
-	"openapi": "3.1.0",
-	"info": map[string]any{
-		"title":       "Arcanum API",
-		"description": "Open-source WhatsApp Gateway with anti-ban, multi-instance, and full media support.",
-		"version":     "1.0.0",
-		"contact": map[string]string{
-			"name": "Arcanum API",
-			"url":  "https://github.com/rafaeldourado9/arcanum",
+// openAPISpec descreve exatamente as rotas registradas em server.go. Rota nova entra aqui
+// junto; rota que ainda nao existe nao entra (antes a spec listava 18 rotas inexistentes).
+func openAPISpec() map[string]any {
+	return map[string]any{
+		"openapi": "3.1.0",
+		"info": map[string]any{
+			"title":       "Arcanum API",
+			"description": "Open-source, self-hosted WhatsApp gateway written in Go: multi-session, built-in anti-ban, signed webhooks.\n\nEvery route except `/health` and `/docs` requires the API key (`X-Api-Key` header or `Authorization: Bearer`). Full guide: https://arcanum.rafaeldourado.tech",
+			"version":     Version,
+			"contact": map[string]string{
+				"name": "Arcanum",
+				"url":  "https://github.com/rafaeldourado9/arcanum",
+			},
+			"license": map[string]string{
+				"name": "MIT",
+				"url":  "https://opensource.org/licenses/MIT",
+			},
 		},
-		"license": map[string]string{
-			"name": "MIT",
-			"url":  "https://opensource.org/licenses/MIT",
+		"servers": []map[string]string{
+			{"url": "/", "description": "This gateway"},
 		},
-	},
-	"servers": []map[string]string{
-		{"url": "http://localhost:3100", "description": "Local"},
-	},
-	"tags": []map[string]string{
-		{"name": "Instance", "description": "Manage WhatsApp instances (connect, disconnect, create, delete)"},
-		{"name": "Message", "description": "Send messages (text, media, buttons, lists, location, contact, poll, reaction, template)"},
-		{"name": "Chat", "description": "Chat operations (archive, find, mark read, profile updates)"},
-		{"name": "Group", "description": "Group management (create, info, participants)"},
-		{"name": "Events", "description": "Webhook and WebSocket configuration"},
-		{"name": "Settings", "description": "Instance settings and proxy configuration"},
-		{"name": "Label", "description": "WhatsApp label management"},
-		{"name": "Template", "description": "Message template management"},
-		{"name": "Call", "description": "Voice/video call operations"},
-		{"name": "Business", "description": "WhatsApp Business catalog and collections"},
-		{"name": "System", "description": "Health check and API docs"},
-	},
-	"paths": buildPaths(),
+		"security": []map[string][]string{{"ApiKeyHeader": {}}, {"BearerAuth": {}}},
+		"components": map[string]any{
+			"securitySchemes": map[string]any{
+				"ApiKeyHeader": map[string]string{"type": "apiKey", "in": "header", "name": "X-Api-Key"},
+				"BearerAuth":   map[string]string{"type": "http", "scheme": "bearer"},
+			},
+		},
+		"tags": []map[string]string{
+			{"name": "Instance", "description": "Create, connect (QR code or pairing code), inspect and remove WhatsApp sessions"},
+			{"name": "Message", "description": "Send text, media, location, contacts, reactions and polls"},
+			{"name": "Chat", "description": "Read receipts, number lookup and profile"},
+			{"name": "Events", "description": "Webhook configuration per instance"},
+			{"name": "Settings", "description": "Per-instance behaviour"},
+			{"name": "System", "description": "Health, metrics, logs and this documentation"},
+			{"name": "Auth", "description": "Dashboard login (browser session). API clients use the API key instead."},
+		},
+		"paths": buildPaths(),
+	}
 }
 
 func buildPaths() map[string]any {
 	return map[string]any{
 		// ── System ──
-		"/health": pathGet("System", "Health check", "Returns gateway status"),
-		"/api/status": pathGet("System", "Connection status", "Returns connection state and rate limit usage"),
+		"/health":          public(pathGet("System", "Health check", "Gateway status, version and session counts by status. Public: no key needed, no session names or numbers.")),
+		"/metrics":         pathGet("System", "Prometheus metrics", "Counters in the Prometheus text format: sessions by status, messages received/sent, webhook deliveries, HTTP responses by code."),
+		"/api/stats":       pathGet("System", "Dashboard stats", "Version, uptime, sessions by status and message/webhook counters as JSON."),
+		"/api/logs":        pathGet("System", "Recent logs", "Last log lines (`?limit=200&level=warn`). No message content or phone numbers; secrets are redacted."),
+		"/api/logs/stream": pathGet("System", "Live logs", "Server-Sent Events stream of new log lines (`text/event-stream`)."),
+
+		// ── Dashboard login ──
+		"/api/auth/login": public(map[string]any{"post": opBody("Auth", "Dashboard login", "Exchange the dashboard password for an HttpOnly session cookie. 10 failures per IP in 15 minutes lock the login (429).", bodyObj(map[string]any{
+			"password": strProp("GATEWAY_DASHBOARD_PASSWORD, or the API key when no password is set", ""),
+		}))}),
+		"/api/auth/logout": public(map[string]any{"post": op("Auth", "Dashboard logout", "End the dashboard session.")}),
+		"/api/auth/me":     public(pathGet("Auth", "Session status", "Whether the browser has a valid dashboard session.")),
 
 		// ── Instance ──
-		"/api/instance/create": pathPost("Instance", "Create instance", "Create a new WhatsApp instance", bodyObj(map[string]any{
-			"instanceName": strProp("Name for this instance", "default"),
-			"webhook":      strProp("Webhook URL for events", "https://example.com/webhook"),
-			"webhookEvents": arrProp("Events to subscribe", []string{"messages", "status", "groups"}),
+		"/api/instance/create": pathPost("Instance", "Create instance", "Create a session. `instanceName`: 1-64 letters, digits, '-' or '_'. Returns 201; 409 if the name exists; 400 if the name or webhook URL is invalid.", bodyObj(map[string]any{
+			"instanceName":  strProp("Session name (1-64 of A-Z a-z 0-9 - _)", "sales"),
+			"webhook":       strProp("Optional webhook URL for this session (http/https)", "https://example.com/webhooks/whatsapp"),
+			"webhookEvents": arrProp("Events to subscribe", []string{"messages", "status"}),
 		})),
-		"/api/instance/connect/{instance}": pathGetQR("Instance", "Connect instance", "Connect and get QR code (waits briefly for the code to be ready)"),
-		"/api/instance/connectionState/{instance}": pathGetQR("Instance", "Get connection state", "Returns current connection status and QR code if pending"),
-		"/api/instance/qr/{instance}": pathGetQR("Instance", "Get QR code", "Returns the current QR code for a pending connection"),
-		"/api/instance/logout/{instance}": pathDelParam("Instance", "Logout instance", "Disconnect and clear session", "instance"),
-		"/api/instance/delete/{instance}": pathDelParam("Instance", "Delete instance", "Remove instance completely", "instance"),
-		"/api/instance/restart/{instance}": pathPostParam("Instance", "Restart instance", "Reconnect instance", "instance"),
-		"/api/instance/setPresence/{instance}": pathPost("Instance", "Set presence", "Set online/offline presence", bodyObj(map[string]any{
-			"presence": strProp("Presence type", "available"),
+		"/api/instance/connect/{instance}":         pathGetQR("Instance", "Connect instance", "Start the connection and return the QR code (waits briefly for it). Calling it again while waiting returns the same QR; it never opens a second client."),
+		"/api/instance/connectionState/{instance}": pathGetQR("Instance", "Connection state", "Current status (disconnected, connecting, qr, connected) and the QR code while waiting for the scan."),
+		"/api/instance/qr/{instance}":              pathGetQR("Instance", "Get QR code", "Current QR code of a pending connection. 404 when there is none."),
+		"/api/instance/pair/{instance}": pathPost("Instance", "Pair by phone number", "Alternative to the QR code: returns an 8-character code to type in WhatsApp > Linked devices > Link with phone number.", bodyObj(map[string]any{
+			"phone": strProp("Phone number with country code, digits only", "5511999999999"),
 		})),
-		"/api/instance/pair/{instance}": pathPost("Instance", "Pair by phone number", "Get a pairing code to link via phone number instead of scanning a QR code", bodyObj(map[string]any{
-			"phone": strProp("Phone number with country code", "5511999999999"),
+		"/api/instance/logout/{instance}":  pathDelParam("Instance", "Disconnect instance", "Disconnect the session. It stays paired and can reconnect with /restart.", "instance"),
+		"/api/instance/delete/{instance}":  pathDelParam("Instance", "Delete instance", "Close the session and remove it from the gateway.", "instance"),
+		"/api/instance/restart/{instance}": pathPostParam("Instance", "Restart instance", "Reconnect the session.", "instance"),
+		"/api/instance/setPresence/{instance}": pathPost("Instance", "Set presence", "Set the account presence.", bodyObj(map[string]any{
+			"presence": strProp("available or unavailable", "available"),
 		})),
-		"/api/instance/fetchInstances": pathGet("Instance", "Fetch all instances", "List all created instances"),
+		"/api/instance/fetchInstances": pathGet("Instance", "List instances", "All sessions with status, settings and webhook configuration."),
 
 		// ── Message ──
-		"/api/message/sendText/{instance}": pathPost("Message", "Send text message", "Send a text message with anti-ban measures (typing indicator, random delay)", bodyObj(map[string]any{
-			"number": strProp("Recipient phone number", "5511999999999"),
+		"/api/message/sendText/{instance}": pathPost("Message", "Send text", "Queued and answered immediately with 202: the anti-ban layer (typing indicator, human delay, per-minute limit, one message at a time per chat) runs in the background. Failures after 3 attempts are reported to the webhook as `send_failed`.", bodyObj(map[string]any{
+			"number": strProp("Phone number with country code, or a full JID", "5511999999999"),
 			"text":   strProp("Message text", "Hello from Arcanum!"),
 		})),
-		"/api/message/sendMedia/{instance}": pathPost("Message", "Send media message", "Send image, audio, document, or video", bodyObj(map[string]any{
-			"number":    strProp("Recipient phone number", "5511999999999"),
-			"mediatype": strProp("Media type: image, audio, document, video", "image"),
-			"mimetype":  strProp("MIME type", "image/jpeg"),
-			"caption":   strProp("Caption for the media", "Check this out"),
-			"media":     strProp("Base64 encoded file or URL", "https://example.com/photo.jpg"),
-			"fileName":  strProp("Filename for documents", "report.pdf"),
-		})),
-		"/api/message/sendButtons/{instance}": pathPost("Message", "Send buttons", "Send interactive button message", bodyObj(map[string]any{
-			"number":      strProp("Recipient", "5511999999999"),
-			"title":       strProp("Button title", "Choose an option"),
-			"description": strProp("Description", "Select one of the options below"),
-			"buttons":     arrProp("Button list", []string{`{"buttonText": "Option 1"}`, `{"buttonText": "Option 2"}`}),
-		})),
-		"/api/message/sendList/{instance}": pathPost("Message", "Send list", "Send interactive list message", bodyObj(map[string]any{
-			"number":      strProp("Recipient", "5511999999999"),
-			"title":       strProp("List title", "Services"),
-			"description": strProp("Description", "Select a service"),
-			"buttonText":  strProp("Button label", "View options"),
-			"sections":    arrProp("List sections", []string{`{"title":"Section 1","rows":[...]}`}),
-		})),
-		"/api/message/sendLocation/{instance}": pathPost("Message", "Send location", "Send GPS location", bodyObj(map[string]any{
+		"/api/message/sendMedia/{instance}": pathPost("Message", "Send media", "Image, audio, video or document. `media` must be the file in base64 (URLs are not downloaded by the gateway).", bodyObj(map[string]any{
 			"number":    strProp("Recipient", "5511999999999"),
-			"name":      strProp("Location name", "City Hall"),
-			"address":   strProp("Address", "123 Main St"),
-			"latitude":  numProp("Latitude", -23.55),
-			"longitude": numProp("Longitude", -46.63),
+			"mediatype": strProp("image, audio, video or document (default)", "image"),
+			"mimetype":  strProp("MIME type", "image/jpeg"),
+			"caption":   strProp("Caption (image, video, document)", "Your receipt"),
+			"media":     strProp("File content in base64", "<base64>"),
+			"fileName":  strProp("File name shown for documents", "receipt.pdf"),
 		})),
-		"/api/message/sendContact/{instance}": pathPost("Message", "Send contact", "Send a contact card (vCard)", bodyObj(map[string]any{
-			"number": strProp("Recipient", "5511999999999"),
-			"contact": arrProp("Contacts", []string{`{"fullName":"John","wuid":"5511888888888","phoneNumber":"5511888888888"}`}),
+		"/api/message/sendLocation/{instance}": pathPost("Message", "Send location", "Send a map pin.", bodyObj(map[string]any{
+			"number":    strProp("Recipient", "5511999999999"),
+			"name":      strProp("Place name", "Head office"),
+			"address":   strProp("Address", "Av. Paulista, 1000"),
+			"latitude":  numProp("Latitude", -23.5614),
+			"longitude": numProp("Longitude", -46.6559),
 		})),
-		"/api/message/sendPoll/{instance}": pathPost("Message", "Send poll", "Send a poll message", bodyObj(map[string]any{
-			"number":       strProp("Recipient", "5511999999999"),
-			"name":         strProp("Poll question", "Best day for meeting?"),
-			"selectableCount": numProp("Max selections", 1),
-			"values":       arrProp("Poll options", []string{"Monday", "Tuesday", "Wednesday"}),
+		"/api/message/sendContact/{instance}": pathPost("Message", "Send contact", "Send one or more contact cards (vCard).", bodyObj(map[string]any{
+			"number":  strProp("Recipient", "5511999999999"),
+			"contact": arrProp("Contacts", []string{`{"fullName":"Support","phoneNumber":"5511888888888"}`}),
 		})),
-		"/api/message/sendReaction/{instance}": pathPost("Message", "Send reaction", "React to a message with an emoji", bodyObj(map[string]any{
+		"/api/message/sendReaction/{instance}": pathPost("Message", "Send reaction", "React to a message with an emoji (empty string removes the reaction).", bodyObj(map[string]any{
 			"key": map[string]any{
 				"type": "object",
 				"properties": map[string]any{
 					"remoteJid": strProp("Chat JID", "5511999999999@s.whatsapp.net"),
-					"id":        strProp("Message ID", "ABCDEF123456"),
+					"id":        strProp("Message ID (from the webhook)", "3EB0C431C26A1916E2F5"),
 				},
 			},
-			"reaction": strProp("Emoji reaction", "👍"),
+			"reaction": strProp("Emoji", "👍"),
 		})),
-		"/api/message/sendTemplate/{instance}": pathPost("Message", "Send template message", "Send a pre-approved template (Meta Business API)", bodyObj(map[string]any{
-			"number":   strProp("Recipient", "5511999999999"),
-			"name":     strProp("Template name", "hello_world"),
-			"language": strProp("Language code", "en_US"),
+		"/api/message/sendPoll/{instance}": pathPost("Message", "Send poll", "Send a poll.", bodyObj(map[string]any{
+			"number":          strProp("Recipient", "5511999999999"),
+			"name":            strProp("Question", "Best day for the meeting?"),
+			"selectableCount": numProp("How many options can be picked", 1),
+			"values":          arrProp("Options", []string{"Monday", "Tuesday", "Wednesday"}),
 		})),
 
 		// ── Chat ──
-		"/api/chat/archiveChat/{instance}": pathPost("Chat", "Archive chat", "Archive or unarchive a conversation", bodyObj(map[string]any{
+		"/api/chat/markMessageAsRead/{instance}": pathPost("Chat", "Mark as read", "Send read receipts (blue ticks).", bodyObj(map[string]any{
+			"readMessages": arrProp("Messages", []string{`{"remoteJid":"5511999999999@s.whatsapp.net","id":"3EB0C431C26A1916E2F5"}`}),
+		})),
+		"/api/chat/checkWhatsAppNumbers/{instance}": pathPost("Chat", "Check numbers", "Which numbers have a WhatsApp account.", bodyObj(map[string]any{
+			"numbers": arrProp("Phone numbers", []string{"5511999999999", "5511888888888"}),
+		})),
+		"/api/chat/updateProfileName/{instance}": pathPost("Chat", "Update profile name", "Change the display name of the account.", bodyObj(map[string]any{
+			"name": strProp("New display name", "Acme Support"),
+		})),
+		"/api/chat/updateProfileStatus/{instance}": pathPost("Chat", "Update about", "Change the 'about' text.", bodyObj(map[string]any{
+			"status": strProp("New about text", "Replies in minutes"),
+		})),
+		"/api/chat/updateProfilePicture/{instance}": pathPost("Chat", "Update profile picture", "Change the profile photo.", bodyObj(map[string]any{
+			"picture": strProp("JPEG image in base64", "<base64>"),
+		})),
+		"/api/chat/archiveChat/{instance}": pathPost("Chat", "Archive chat (planned)", "Not implemented yet: returns 501.", bodyObj(map[string]any{
 			"chat":    strProp("Chat JID", "5511999999999@s.whatsapp.net"),
 			"archive": boolProp("Archive (true) or unarchive (false)", true),
 		})),
-		"/api/chat/findChats/{instance}": pathPost("Chat", "Find chats", "List all chats", nil),
-		"/api/chat/findContacts/{instance}": pathPost("Chat", "Find contacts", "List all contacts", nil),
-		"/api/chat/findMessages/{instance}": pathPost("Chat", "Find messages", "Search messages in a chat", bodyObj(map[string]any{
-			"where": map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"key": map[string]any{
-						"type": "object",
-						"properties": map[string]any{
-							"remoteJid": strProp("Chat JID", "5511999999999@s.whatsapp.net"),
-						},
-					},
-				},
-			},
-			"limit": numProp("Max results", 20),
-		})),
-		"/api/chat/markMessageAsRead/{instance}": pathPost("Chat", "Mark message as read", "Send read receipt for messages", bodyObj(map[string]any{
-			"readMessages": arrProp("Message IDs to mark as read", []string{`{"remoteJid":"...","id":"..."}`}),
-		})),
-		"/api/chat/updateProfileName/{instance}": pathPost("Chat", "Update profile name", "Change WhatsApp display name", bodyObj(map[string]any{
-			"name": strProp("New display name", "Arcanum Bot"),
-		})),
-		"/api/chat/updateProfilePicture/{instance}": pathPost("Chat", "Update profile picture", "Change WhatsApp profile photo", bodyObj(map[string]any{
-			"picture": strProp("Base64 encoded image", "<base64>"),
-		})),
-		"/api/chat/updateProfileStatus/{instance}": pathPost("Chat", "Update profile status", "Change WhatsApp about/status text", bodyObj(map[string]any{
-			"status": strProp("New status text", "Powered by Arcanum API"),
-		})),
-		"/api/chat/checkWhatsAppNumbers/{instance}": pathPost("Chat", "Check WhatsApp numbers", "Verify which phone numbers have WhatsApp", bodyObj(map[string]any{
-			"numbers": arrProp("Phone numbers to check", []string{"5511999999999", "5511888888888"}),
-		})),
-
-		// ── Group ──
-		"/api/group/create/{instance}": pathPost("Group", "Create group", "Create a new WhatsApp group", bodyObj(map[string]any{
-			"subject":      strProp("Group name", "Project Team"),
-			"participants": arrProp("Participant phone numbers", []string{"5511999999999", "5511888888888"}),
-		})),
-		"/api/group/info/{instance}": pathGetParam("Group", "Get group info", "Get group metadata (name, description, participants)", "instance"),
-		"/api/group/participants/{instance}": pathGetParam("Group", "Get participants", "List group participants", "instance"),
-		"/api/group/updateParticipant/{instance}": pathPost("Group", "Update participant", "Add, remove, promote, or demote a participant", bodyObj(map[string]any{
-			"groupJid": strProp("Group JID", "123456789@g.us"),
-			"action":   strProp("Action: add, remove, promote, demote", "add"),
-			"participants": arrProp("Participant numbers", []string{"5511999999999"}),
-		})),
+		"/api/chat/findChats/{instance}":    pathPost("Chat", "Find chats (planned)", "Planned: needs a message store. Returns an empty list today.", nil),
+		"/api/chat/findContacts/{instance}": pathPost("Chat", "Find contacts (planned)", "Planned: needs a contact store. Returns an empty list today.", nil),
+		"/api/chat/findMessages/{instance}": pathPost("Chat", "Find messages (planned)", "Planned: needs a message store. Returns an empty list today.", nil),
 
 		// ── Events ──
 		"/api/events/webhook/{instance}": map[string]any{
-			"get": op("Events", "Get webhook", "Get current webhook configuration for this instance"),
-			"post": opBody("Events", "Set webhook", "Configure webhook URL and events", bodyObj(map[string]any{
-				"url":     strProp("Webhook URL", "https://example.com/webhook"),
-				"events":  arrProp("Events to subscribe", []string{"messages", "status", "groups", "calls"}),
-				"enabled": boolProp("Enable webhook", true),
+			"get": op("Events", "Get webhook", "Current webhook configuration of the session."),
+			"post": opBody("Events", "Set webhook", "Change the webhook URL, events or turn it on/off. The URL must be http/https; cloud metadata and link-local addresses are refused.", bodyObj(map[string]any{
+				"url":     strProp("Webhook URL", "https://example.com/webhooks/whatsapp"),
+				"events":  arrProp("Events to subscribe", []string{"messages", "status"}),
+				"enabled": boolProp("Deliver events", true),
 			})),
 		},
-		"/api/events/websocket/{instance}": pathPost("Events", "Set WebSocket", "Enable WebSocket events for real-time streaming", bodyObj(map[string]any{
-			"enabled": boolProp("Enable WebSocket", true),
-		})),
+		"/api/events/webhook/{instance}/test":       pathPost("Events", "Test webhook", "Send a signed `{\"event\":\"test\"}` delivery to the webhook and return the result (status, duration, error).", nil),
+		"/api/events/webhook/{instance}/deliveries": pathGetParam("Events", "Webhook deliveries", "Last 100 deliveries of this session: event, HTTP status, duration, error. Bodies are not stored.", "instance"),
+		"/api/events/webhooks/export":               pathGet("Events", "Export webhooks", "Webhook configuration of every session as a JSON file."),
+		"/api/events/webhooks/import": map[string]any{"post": opBody("Events", "Import webhooks", "Apply an exported file to existing sessions. Unknown sessions and invalid URLs are skipped with the reason.", bodyObj(map[string]any{
+			"webhooks": map[string]any{"type": "object", "description": "instance name -> {url, events, enabled}"},
+		}))},
 
 		// ── Settings ──
 		"/api/settings/{instance}": map[string]any{
-			"get":  op("Settings", "Get settings", "Get current instance settings"),
-			"post": opBody("Settings", "Set settings", "Update instance settings", bodyObj(map[string]any{
-				"rejectCalls":       boolProp("Auto-reject incoming calls", false),
-				"groupsIgnore":      boolProp("Ignore group messages", false),
-				"alwaysOnline":      boolProp("Always show as online", false),
-				"readMessages":      boolProp("Auto-read incoming messages", true),
-				"readStatus":        boolProp("Auto-read status/stories", false),
-				"syncFullHistory":   boolProp("Sync full chat history on connect", false),
+			"get": op("Settings", "Get settings", "Current settings of the session."),
+			"post": opBody("Settings", "Update settings", "Today only `groupsIgnore` changes behaviour; the other flags are stored for upcoming releases.", bodyObj(map[string]any{
+				"groupsIgnore":    boolProp("Do not forward group messages", true),
+				"rejectCalls":     boolProp("Planned: auto-reject calls", false),
+				"alwaysOnline":    boolProp("Planned: always online", false),
+				"readMessages":    boolProp("Planned: auto read receipts", true),
+				"readStatus":      boolProp("Planned: auto read status", false),
+				"syncFullHistory": boolProp("Planned: full history sync", false),
 			})),
 		},
-
-		// ── Proxy ──
-		"/api/proxy/{instance}": map[string]any{
-			"get": op("Settings", "Get proxy", "Get proxy configuration"),
-			"post": opBody("Settings", "Set proxy", "Configure HTTP/SOCKS proxy", bodyObj(map[string]any{
-				"enabled":  boolProp("Enable proxy", true),
-				"host":     strProp("Proxy host", "proxy.example.com"),
-				"port":     numProp("Proxy port", 8080),
-				"protocol": strProp("Protocol: http, https, socks5", "socks5"),
-				"username": strProp("Proxy username (optional)", ""),
-				"password": strProp("Proxy password (optional)", ""),
-			})),
-		},
-
-		// ── Label ──
-		"/api/label/{instance}": map[string]any{
-			"get": op("Label", "Get labels", "List all WhatsApp labels"),
-			"post": opBody("Label", "Handle label", "Create, update, or assign label to chat", bodyObj(map[string]any{
-				"name":   strProp("Label name", "Important"),
-				"color":  numProp("Label color index", 1),
-				"chatId": strProp("Chat to assign (optional)", "5511999999999@s.whatsapp.net"),
-			})),
-		},
-
-		// ── Template ──
-		"/api/template/create/{instance}": pathPost("Template", "Create template", "Create a message template (Meta Business API)", bodyObj(map[string]any{
-			"name":     strProp("Template name", "order_confirmation"),
-			"language": strProp("Language", "pt_BR"),
-			"category": strProp("Category: MARKETING, UTILITY, AUTHENTICATION", "UTILITY"),
-			"components": arrProp("Template components", []string{`{"type":"BODY","text":"Hello {{1}}"}`}),
-		})),
-		"/api/template/delete/{instance}/{name}": pathDelParam("Template", "Delete template", "Delete a message template", "instance"),
-		"/api/template/edit/{instance}": pathPost("Template", "Edit template", "Edit an existing template", bodyObj(map[string]any{
-			"name":       strProp("Template name", "order_confirmation"),
-			"components": arrProp("Updated components", []string{`{"type":"BODY","text":"Updated {{1}}"}`}),
-		})),
-		"/api/template/find/{instance}": pathGetParam("Template", "Find templates", "List all approved templates", "instance"),
-
-		// ── Call ──
-		"/api/call/offer/{instance}": pathPost("Call", "Offer call", "Initiate a voice/video call", bodyObj(map[string]any{
-			"number":   strProp("Recipient", "5511999999999"),
-			"callType": strProp("Type: audio, video", "audio"),
-		})),
-
-		// ── Business ──
-		"/api/business/catalog/{instance}": pathPost("Business", "Get catalog", "Fetch WhatsApp Business catalog", nil),
-		"/api/business/collections/{instance}": pathPost("Business", "Get collections", "Fetch WhatsApp Business collections", nil),
 	}
+}
+
+// public tira a exigencia de chave de uma rota na spec (o middleware faz o mesmo).
+func public(path map[string]any) map[string]any {
+	for _, v := range path {
+		if o, ok := v.(map[string]any); ok {
+			o["security"] = []any{}
+		}
+	}
+	return path
 }
 
 // ── helpers ──
@@ -273,7 +212,10 @@ func bodyObj(props map[string]any) map[string]any {
 func op(tag, summary, desc string) map[string]any {
 	return map[string]any{
 		"tags": []string{tag}, "summary": summary, "description": desc,
-		"responses": map[string]any{"200": map[string]string{"description": "Success"}},
+		"responses": map[string]any{
+			"200": map[string]string{"description": "Success"},
+			"401": map[string]string{"description": "Missing or invalid API key"},
+		},
 	}
 }
 
@@ -288,10 +230,15 @@ func pathGet(tag, summary, desc string) map[string]any {
 }
 
 func pathPost(tag, summary, desc string, body map[string]any) map[string]any {
+	o := op(tag, summary, desc)
+	o["parameters"] = []map[string]any{instanceParam()}
 	if body != nil {
-		return map[string]any{"post": opBody(tag, summary, desc, body)}
+		o["requestBody"] = body
 	}
-	return map[string]any{"post": op(tag, summary, desc)}
+	if tag == "Instance" && summary == "Create instance" {
+		delete(o, "parameters") // unica rota POST sem {instance} no caminho
+	}
+	return map[string]any{"post": o}
 }
 
 func instanceParam() map[string]any {
@@ -309,12 +256,6 @@ func formatParam() map[string]any {
 	}
 }
 
-func pathGetParam(tag, summary, desc, _ string) map[string]any {
-	o := op(tag, summary, desc)
-	o["parameters"] = []map[string]any{instanceParam()}
-	return map[string]any{"get": o}
-}
-
 // pathGetQR documents GET endpoints backed by writeQRResponse: they return the
 // QR code as a JSON data URL by default, or a binary PNG with ?format=png.
 func pathGetQR(tag, summary, desc string) map[string]any {
@@ -328,7 +269,7 @@ func pathGetQR(tag, summary, desc string) map[string]any {
 					"schema": map[string]any{
 						"type": "object",
 						"properties": map[string]any{
-							"instanceName": strProp("Instance name", "default"),
+							"instanceName": strProp("Instance name", "sales"),
 							"status":       strProp("Connection status", "qr"),
 							"qr":           strProp("QR code as a data URL", "data:image/png;base64,..."),
 						},
@@ -339,6 +280,7 @@ func pathGetQR(tag, summary, desc string) map[string]any {
 				},
 			},
 		},
+		"401": map[string]string{"description": "Missing or invalid API key"},
 	}
 	return map[string]any{"get": o}
 }
@@ -353,4 +295,10 @@ func pathDelParam(tag, summary, desc, _ string) map[string]any {
 	o := op(tag, summary, desc)
 	o["parameters"] = []map[string]any{instanceParam()}
 	return map[string]any{"delete": o}
+}
+
+func pathGetParam(tag, summary, desc, _ string) map[string]any {
+	o := op(tag, summary, desc)
+	o["parameters"] = []map[string]any{instanceParam()}
+	return map[string]any{"get": o}
 }

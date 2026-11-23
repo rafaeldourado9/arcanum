@@ -1,6 +1,10 @@
 package provider
 
-import "testing"
+import (
+	"testing"
+
+	"go.mau.fi/whatsmeow/types"
+)
 
 // TestToJIDPreservesServerForFullJIDs is a regression test for a production
 // bug: incoming senders are increasingly identified by LID (a numeric
@@ -53,4 +57,40 @@ func TestToJIDPreservesServerForFullJIDs(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Quem escreve de um aparelho vinculado chega como "123:30@lid". Responder para esse
+// endereco falha no WhatsApp; a resposta tem de ir para a pessoa ("123@lid").
+func TestToJIDDropsTheDevicePart(t *testing.T) {
+	jid := toJID("23927447416901:30@lid")
+	if jid.String() != "23927447416901@lid" || jid.Device != 0 {
+		t.Fatalf("got %q (device %d), want 23927447416901@lid", jid.String(), jid.Device)
+	}
+}
+
+// O sistema trabalha com telefone: remetente "@lid" vira o telefone que o WhatsApp manda junto.
+func TestSenderAddressPrefersThePhoneOverTheLID(t *testing.T) {
+	w := NewWhatsmeow(t.TempDir())
+	lid := types.NewJID("123456789012345", types.HiddenUserServer)
+	phone := types.NewJID("5567998830491", types.DefaultUserServer)
+	cases := []struct {
+		name string
+		info types.MessageInfo
+		want string
+	}{
+		{"telefone ja vem direto", info(phone, types.EmptyJID), "5567998830491@s.whatsapp.net"},
+		{"lid com o telefone em SenderAlt", info(lid, phone), "5567998830491@s.whatsapp.net"},
+		{"lid sem telefone conhecido fica lid", info(lid, types.EmptyJID), "123456789012345@lid"},
+	}
+	for _, tc := range cases {
+		if got := w.senderAddress(tc.info.MessageSource); got != tc.want {
+			t.Errorf("%s: got %q, want %q", tc.name, got, tc.want)
+		}
+	}
+}
+
+func info(sender, alt types.JID) types.MessageInfo {
+	var i types.MessageInfo
+	i.Sender, i.SenderAlt = sender, alt
+	return i
 }

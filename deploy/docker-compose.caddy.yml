@@ -1,0 +1,37 @@
+# Arcanum on a public server with automatic HTTPS (Let's Encrypt via Caddy).
+#   1. Point the DNS of your domain (e.g. wa.example.com) to this server.
+#   2. cp ../.env.example .env and fill it; add ARCANUM_DOMAIN=wa.example.com
+#   3. docker compose -f docker-compose.caddy.yml up -d
+# Arcanum is not published on any port: only Caddy reaches it, on the internal network.
+services:
+  arcanum:
+    image: ghcr.io/rafaeldourado9/arcanum:latest
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - arcanum-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    command: caddy reverse-proxy --from ${ARCANUM_DOMAIN:?set ARCANUM_DOMAIN in .env} --to arcanum:3100
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - arcanum
+
+volumes:
+  arcanum-data:
+  caddy-data:
+  caddy-config:

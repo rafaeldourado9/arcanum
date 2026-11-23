@@ -5,6 +5,90 @@ Todas as mudanças notaveis do projeto serao documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere ao [Versionamento Semantico](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - não lançada
+
+Foco: segurança e confiabilidade. **Mudança incompatível:** toda rota agora exige chave de API.
+
+### Segurança
+
+- **Chave de API obrigatória** em toda rota, menos `/health` e `/docs` (`X-Api-Key` ou
+  `Authorization: Bearer`, comparação em tempo constante). Sem `GATEWAY_API_KEY`, uma chave
+  temporária é gerada e mostrada no log. `GATEWAY_AUTH_DISABLED=true` só para desenvolvimento.
+- Nome de instância validado (`A-Z a-z 0-9 - _`, até 64): antes, `../` gravava a sessão fora
+  da pasta de dados.
+- Webhook protegido contra SSRF: só `http`/`https`, metadados da nuvem e link-local bloqueados
+  na hora da conexão, sem seguir redirecionamento, sem credencial na URL.
+- Logs sem número, nome ou texto de mensagem (LGPD/GDPR).
+- Limite de tamanho de requisição (`GATEWAY_MAX_BODY_MB`), timeouts HTTP e cabeçalhos de
+  segurança (`nosniff`, `X-Frame-Options`, CSP, `no-store`).
+- Imagem Docker sem root, pasta de dados `700`, build reprodutível e `HEALTHCHECK`.
+- Removido `middleware.RealIP` (aceitava `X-Forwarded-For` falsificado).
+- Dependências atualizadas sem vulnerabilidade conhecida (Go 1.26.11, chi v5.5.0, whatsmeow
+  de 16/11/2026).
+- CI com detector de corrida, `staticcheck`, `govulncheck`, `gosec` e Trivy; Dependabot;
+  `SECURITY.md`.
+
+### Corrigido
+
+- QR code não aparecia: a whatsmeow desatualizada era recusada pelo WhatsApp e os erros do QR
+  eram descartados sem log. Agora a biblioteca está atualizada e todo evento de QR com erro
+  vai para o log.
+- "Conectar" repetido abria vários clientes ao mesmo tempo, sem fechar os anteriores.
+- `updateProfileName` trocava o recado em vez do nome.
+- Trocar o webhook pela API mudava o formato do payload para `simple` sem aviso.
+- `archiveChat` respondia sucesso sem arquivar; agora responde `501`.
+- Especificação OpenAPI listava 18 rotas inexistentes; agora um teste garante que ela bate com
+  o roteador.
+- Erros de validação ao criar instância voltam `400` (antes `409`).
+
+### Painel web (novo)
+
+- Painel embutido no binário em `/` (React, Vite, Tailwind; tema claro e escuro; inglês e
+  português): visão geral, sessões com QR code que se atualiza sozinho e código de pareamento,
+  página da sessão com webhook, teste de entrega, histórico das últimas 100 entregas e
+  configurações, exportar/importar webhooks e logs ao vivo.
+- Login com `GATEWAY_DASHBOARD_PASSWORD` (sem ela, a chave de API): cookie HttpOnly +
+  SameSite=Strict, cabeçalho anti-CSRF obrigatório, bloqueio após 10 erros por IP, CSP
+  restrita, sessões guardadas por hash em memória. `GATEWAY_DASHBOARD=false` desliga.
+- Rotas novas: `/api/stats`, `/api/logs`, `/api/logs/stream` (SSE), `/api/auth/*`,
+  `/api/events/webhook/{instance}/test`, `/api/events/webhook/{instance}/deliveries`,
+  `/api/events/webhooks/export` e `/import`. Logs do painel mascaram segredos.
+
+### Instalação (nova)
+
+- SQLite em Go puro (`modernc.org/sqlite`): sem CGO, binário estático, compila para qualquer
+  sistema. Sessões já pareadas continuam abrindo (mesmo formato de arquivo).
+- Binários para Linux, macOS e Windows (amd64 e arm64) a cada versão, com `checksums.txt` e
+  atestado de proveniência (GoReleaser).
+- Script de instalação (`install.sh`, confere SHA-256) com `--systemd`, que cria usuário,
+  pasta, `.env` com chave e senha aleatórias e serviço do systemd isolado.
+- Imagem distroless (34 MB, sem shell), usuário nonroot (UID 65532), funciona somente leitura;
+  comandos `arcanum healthcheck` e `arcanum version`.
+- `deploy/`: Compose local, Compose com HTTPS (Caddy), manifesto do Kubernetes, unit do systemd.
+- **Atualizando da 1.0:** o volume de dados precisa passar para o UID 65532
+  (`docker run --rm -v arcanum-data:/data alpine chown -R 65532:65532 /data`).
+
+### Corrigido (painel)
+
+- Configuração de webhook e de cada sessão se perdia ao reiniciar; agora fica em `<nome>.json`.
+- Apagar a instância não apagava o `<nome>.db`, e ela voltava no reinício; agora desconecta o
+  aparelho do celular e remove os arquivos.
+- Leitura e escrita da configuração da instância sem trava (condição de corrida).
+- Arquivos da sessão eram criados legíveis por outros usuários; agora `600`.
+
+### Adicionado
+
+- `fromMe` no webhook: mensagens enviadas pelo próprio número (atendente no celular), com
+  `from` igual ao contato.
+- Correções que estavam só na cópia usada pelo Prospecta: envio serial por conversa, filtro de
+  grupo/status/transmissão, remetente pelo telefone em vez do `@lid`, mensagens com mais de 10
+  minutos ignoradas, eventos `typing` e `send_failed`.
+- `GET /metrics` (Prometheus) e `/health` com versão e sessões por status.
+- Logs estruturados (`GATEWAY_LOG_FORMAT=json`, `GATEWAY_LOG_LEVEL`) e desligamento limpo.
+- Documentação completa em inglês e português (MkDocs) em
+  https://arcanum.rafaeldourado.tech, `.env.example` e imagem publicada no GHCR por tag,
+  multi-arquitetura, com SBOM, proveniência e assinatura Cosign.
+
 ## [1.0.0] - 2026-06-20
 
 ### Adicionado

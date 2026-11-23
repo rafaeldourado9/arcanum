@@ -1,477 +1,160 @@
 <p align="center">
-  <img src="logo.svg" width="180" alt="Arcanum API">
+  <img src="web/public/logo.svg" width="96" alt="Arcanum">
 </p>
 
-<h1 align="center">Arcanum API</h1>
+<h1 align="center">Arcanum</h1>
 
 <p align="center">
-  <strong>Gateway WhatsApp open-source com anti-ban nativo, multi-instancia e suporte completo a midia.</strong>
-</p>
-
-<p align="center">
-  <a href="#instalacao">Instalacao</a> •
-  <a href="#inicio-rapido">Inicio Rapido</a> •
-  <a href="#endpoints">Endpoints</a> •
-  <a href="#anti-ban">Anti-Ban</a> •
-  <a href="#configuracao">Configuracao</a> •
-  <a href="#docker">Docker</a> •
-  <a href="CONTRIBUTING.md">Contribuir</a>
+  <strong>Open-source, self-hosted WhatsApp gateway in Go.</strong><br>
+  Multi-session, built-in anti-ban, signed webhooks and a web dashboard. One static binary, no browser, no Node.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Go-1.25-00ADD8?logo=go&logoColor=white" alt="Go 1.25">
-  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License">
-  <img src="https://img.shields.io/badge/WhatsApp-Gateway-25D366?logo=whatsapp&logoColor=white" alt="WhatsApp">
-  <img src="https://img.shields.io/badge/Status-Production_Ready-brightgreen" alt="Status">
-  <img src="https://img.shields.io/badge/Anti--Ban-Built--in-purple" alt="Anti-Ban">
+  <a href="https://github.com/rafaeldourado9/arcanum/actions/workflows/ci.yml"><img src="https://github.com/rafaeldourado9/arcanum/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/rafaeldourado9/arcanum/releases"><img src="https://img.shields.io/github/v/release/rafaeldourado9/arcanum?sort=semver" alt="Release"></a>
+  <img src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-black.svg" alt="MIT"></a>
+</p>
+
+<p align="center">
+  <a href="https://arcanum.rafaeldourado.tech"><b>Documentation</b></a> ·
+  <a href="https://arcanum.rafaeldourado.tech/pt/"><b>Documentação em português</b></a> ·
+  <a href="https://arcanum.rafaeldourado.tech/getting-started/">Getting started</a> ·
+  <a href="https://arcanum.rafaeldourado.tech/webhooks/">Webhooks</a> ·
+  <a href="SECURITY.md">Security</a>
 </p>
 
 ---
 
-## O que e o Arcanum?
+<p align="center">
+  <img src="docs/assets/screenshots/overview.jpg" alt="Arcanum dashboard: overview" width="880">
+</p>
 
-Arcanum API e um gateway WhatsApp standalone que conecta ao WhatsApp via protocolo web (whatsmeow) e expoe uma API REST completa. Pensado para ser o sucessor moderno do Evolution API.
+<table>
+  <tr>
+    <td><img src="docs/assets/screenshots/connect-qr.jpg" alt="Connect a number with the QR code"></td>
+    <td><img src="docs/assets/screenshots/session.jpg" alt="Session page with webhook test and deliveries"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshots/logs.jpg" alt="Live logs"></td>
+    <td><img src="docs/assets/screenshots/overview-dark.jpg" alt="Dark theme"></td>
+  </tr>
+</table>
 
-### Diferenciais
+## Why Arcanum
 
-- **Anti-ban nativo** — delay aleatorio, "digitando...", read receipts, rate limiting em todo envio
-- **Multi-instancia** — gerencie multiplos numeros WhatsApp na mesma API
-- **Midia completa** — imagem, audio, video, documento, localizacao, contato, enquete, reacao
-- **Webhook configuravel** — URL, eventos e toggle por instancia via API
-- **Provider-agnostico** — interface abstrata, pode trocar o engine sem mudar a API
-- **Docker-first** — single binary, Alpine, pronto para producao
-- **Swagger UI** — documentacao interativa em `/docs`
+- **Light**: a single Go binary on [whatsmeow](https://github.com/tulir/whatsmeow). Starts in
+  milliseconds, small memory footprint, runs on a Raspberry Pi.
+- **Anti-ban built in**: typing indicator sized to the message, human-like delay, per-minute
+  limit and one message at a time per chat, on every send.
+- **Many numbers, one API**: each session has its own webhook, settings and rate limit, and
+  survives restarts.
+- **Webhooks you can trust**: HMAC-SHA256 signatures, Meta Cloud API compatible format or a
+  simple flat one, and a `fromMe` flag for human takeover.
+- **Dashboard included**: manage sessions, scan QR codes, test webhooks and watch live logs
+  in the browser, light and dark, English and Portuguese.
+- **Secure by default**: API key on every route, password-protected dashboard, SSRF-safe
+  webhooks, no personal data in logs, distroless non-root image, vulnerability scans in CI.
+- **Installs anywhere**: Docker, a one-line script, systemd, Kubernetes, or a single binary
+  for Linux, macOS and Windows.
 
----
-
-## Instalacao
-
-### Docker (recomendado)
+## Quick start
 
 ```bash
-docker run -d \
-  --name arcanum \
-  -p 3100:3100 \
-  -v arcanum_data:/data \
+export ARCANUM_KEY="$(openssl rand -hex 32)"
+
+docker run -d --name arcanum -p 3100:3100 \
+  -e GATEWAY_API_KEY="$ARCANUM_KEY" \
+  -e GATEWAY_DASHBOARD_PASSWORD="choose-a-long-password" \
+  -v arcanum-data:/data \
   ghcr.io/rafaeldourado9/arcanum:latest
+
+# open http://localhost:3100 for the dashboard, or use the API:
+# create a session and get the QR code
+curl -X POST localhost:3100/api/instance/create \
+  -H "X-Api-Key: $ARCANUM_KEY" -H "Content-Type: application/json" \
+  -d '{"instanceName": "sales"}'
+curl -H "X-Api-Key: $ARCANUM_KEY" "localhost:3100/api/instance/connect/sales?format=png" -o qr.png
+
+# after scanning qr.png in WhatsApp > Linked devices:
+curl -X POST localhost:3100/api/message/sendText/sales \
+  -H "X-Api-Key: $ARCANUM_KEY" -H "Content-Type: application/json" \
+  -d '{"number": "5511999999999", "text": "Hello from Arcanum!"}'
 ```
 
-### Docker Compose
+Open **http://localhost:3100** for the dashboard, or **/docs** for the interactive API.
 
-```yaml
-services:
-  arcanum:
-    image: ghcr.io/rafaeldourado9/arcanum:latest
-    ports:
-      - "3100:3100"
-    environment:
-      GATEWAY_PORT: "3100"
-      GATEWAY_WEBHOOK_FORWARD_URL: "http://seu-backend:8000/webhook"
-      GATEWAY_META_APP_SECRET: "seu-secret-para-hmac"
-    volumes:
-      - arcanum_data:/data
+No Docker? `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh` (add
+`-s -- --systemd` to install it as a service), or grab a binary for Linux, macOS or Windows
+from [Releases](https://github.com/rafaeldourado9/arcanum/releases). All options:
+[Installation](https://arcanum.rafaeldourado.tech/installation/).
 
-volumes:
-  arcanum_data:
-```
+**Learn by doing:** four short [tutorials](https://arcanum.rafaeldourado.tech/tutorials/)
+([em português](https://arcanum.rafaeldourado.tech/pt/tutorials/)) build a real bot from the
+ready-made project in [`examples/faq-bot`](examples/faq-bot): automatic answers, human
+takeover, notifications from your system and moving servers.
 
-### Build manual
+The full guide (sessions, every message type, webhook payloads with signature
+verification in Python, Node.js, Go and PHP, production setup with HTTPS, monitoring and
+troubleshooting) is at **[arcanum.rafaeldourado.tech](https://arcanum.rafaeldourado.tech)**,
+in English and Portuguese. The same pages live in [`docs/`](docs/) in this repository.
+
+## Features
+
+| | |
+|---|---|
+| Sessions | QR code (JSON or PNG) or pairing code, auto-reconnect, persisted across restarts |
+| Messages | Text, image, audio, video, document, location, contact, reaction, poll |
+| Chat | Read receipts, number lookup, profile name, about and photo |
+| Webhooks | `simple` or `meta` format, HMAC signature, typing and send-failure events, `fromMe` |
+| Dashboard | Sessions and QR codes, webhook test and delivery history, export/import, live logs |
+| Operations | `/health`, Prometheus `/metrics`, JSON logs, graceful shutdown, health check |
+| Security | API key, SSRF protection, request limits, security headers, non-root image |
+
+On the roadmap: per-event webhook filtering and retries, message store
+(`findChats`, `findMessages`), groups, and official SDKs for Python, Node.js and Go.
+
+## Configuration
+
+Everything is set through environment variables. The essentials:
+
+| Variable | Default | |
+|---|---|---|
+| `GATEWAY_API_KEY` | generated | Required key. Use `openssl rand -hex 32`. |
+| `GATEWAY_WEBHOOK_FORWARD_URL` | | Webhook for every session (`{instance}` is replaced). |
+| `GATEWAY_META_APP_SECRET` | | HMAC secret for webhook signatures. |
+| `GATEWAY_WEBHOOK_FORMAT` | `simple` | `simple` or `meta`. |
+| `GATEWAY_DASHBOARD_PASSWORD` | | Dashboard password (without it, sign in with the API key). |
+
+See [`.env.example`](.env.example) and the
+[configuration reference](https://arcanum.rafaeldourado.tech/configuration/).
+
+## Development
 
 ```bash
-git clone https://github.com/rafaeldourado9/arcanum.git
-cd arcanum
-go build -o arcanum ./cmd/gateway
-./arcanum
+go test ./...                         # Go 1.26+, no C compiler needed (pure-Go SQLite)
+(cd web && npm ci && npm run build)   # dashboard, embedded into the binary
+go run ./cmd/gateway
 ```
 
-> Requer Go 1.25+ e CGO habilitado (para SQLite).
-
----
-
-## Inicio Rapido
-
-### 1. Inicie o Arcanum
+No Go installed? Run the tests in Docker:
 
 ```bash
-docker compose up -d
+docker run --rm -v "$PWD":/src -w /src golang:1.26-alpine go test ./...
 ```
 
-### 2. Crie uma instancia
+Docs preview: `pip install -r requirements-docs.txt && mkdocs serve`.
 
-```bash
-curl -X POST http://localhost:3100/api/instance/create \
-  -H "Content-Type: application/json" \
-  -d '{"instanceName": "meu-bot", "webhook": "http://meu-backend/webhook"}'
-```
+Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues
+privately as described in [SECURITY.md](SECURITY.md).
 
-### 3. Conecte via QR Code
+## Disclaimer
 
-```bash
-# Conectar (gera o QR)
-curl http://localhost:3100/api/instance/connect/meu-bot
+Arcanum is not affiliated with, endorsed by or connected to WhatsApp or Meta. It uses the
+same protocol as WhatsApp Web. Automated messaging can get numbers banned: follow
+[WhatsApp's terms](https://www.whatsapp.com/legal/terms-of-service) and only message
+people who expect to hear from you.
 
-# Abra no browser para escanear
-open http://localhost:3100/api/instance/qr/meu-bot?format=png
-```
+## License
 
-Escaneie o QR com o WhatsApp: **Configuracoes > Dispositivos conectados > Conectar dispositivo**
-
-### 4. Envie uma mensagem
-
-```bash
-curl -X POST http://localhost:3100/api/message/sendText/meu-bot \
-  -H "Content-Type: application/json" \
-  -d '{"number": "5511999999999", "text": "Ola! Mensagem enviada pelo Arcanum."}'
-```
-
-### 5. Receba mensagens
-
-Quando alguem enviar uma mensagem para o numero conectado, o Arcanum encaminha automaticamente para o webhook configurado com assinatura HMAC-SHA256.
-
----
-
-## Endpoints
-
-### Instancia
-
-| Metodo | Endpoint | Descricao |
-|--------|----------|-----------|
-| `POST` | `/api/instance/create` | Criar instancia |
-| `GET` | `/api/instance/connect/{nome}` | Conectar (gera QR) |
-| `GET` | `/api/instance/connectionState/{nome}` | Status da conexao |
-| `GET` | `/api/instance/qr/{nome}` | QR code (JSON ou `?format=png`) |
-| `POST` | `/api/instance/pair/{nome}` | Pairing por telefone |
-| `DELETE` | `/api/instance/logout/{nome}` | Desconectar |
-| `DELETE` | `/api/instance/delete/{nome}` | Remover instancia |
-| `POST` | `/api/instance/restart/{nome}` | Reconectar |
-| `POST` | `/api/instance/setPresence/{nome}` | Definir presenca |
-| `GET` | `/api/instance/fetchInstances` | Listar todas |
-
-### Mensagens
-
-| Metodo | Endpoint | Descricao |
-|--------|----------|-----------|
-| `POST` | `/api/message/sendText/{nome}` | Enviar texto (com anti-ban) |
-| `POST` | `/api/message/sendMedia/{nome}` | Enviar imagem/audio/doc/video |
-| `POST` | `/api/message/sendLocation/{nome}` | Enviar localizacao |
-| `POST` | `/api/message/sendContact/{nome}` | Enviar contato (vCard) |
-| `POST` | `/api/message/sendReaction/{nome}` | Enviar reacao (emoji) |
-| `POST` | `/api/message/sendPoll/{nome}` | Enviar enquete |
-
-### Chat
-
-| Metodo | Endpoint | Descricao |
-|--------|----------|-----------|
-| `POST` | `/api/chat/markMessageAsRead/{nome}` | Marcar como lido |
-| `POST` | `/api/chat/checkWhatsAppNumbers/{nome}` | Verificar numeros |
-| `POST` | `/api/chat/updateProfileName/{nome}` | Atualizar nome |
-| `POST` | `/api/chat/updateProfileStatus/{nome}` | Atualizar status |
-| `POST` | `/api/chat/updateProfilePicture/{nome}` | Atualizar foto |
-| `POST` | `/api/chat/archiveChat/{nome}` | Arquivar conversa |
-| `POST` | `/api/chat/findChats/{nome}` | Listar conversas |
-| `POST` | `/api/chat/findContacts/{nome}` | Listar contatos |
-| `POST` | `/api/chat/findMessages/{nome}` | Buscar mensagens |
-
-### Eventos
-
-| Metodo | Endpoint | Descricao |
-|--------|----------|-----------|
-| `GET` | `/api/events/webhook/{nome}` | Ver config do webhook |
-| `POST` | `/api/events/webhook/{nome}` | Configurar webhook |
-
-### Configuracoes
-
-| Metodo | Endpoint | Descricao |
-|--------|----------|-----------|
-| `GET` | `/api/settings/{nome}` | Ver configuracoes |
-| `POST` | `/api/settings/{nome}` | Atualizar configuracoes |
-
-### Sistema
-
-| Metodo | Endpoint | Descricao |
-|--------|----------|-----------|
-| `GET` | `/health` | Health check |
-| `GET` | `/docs` | Swagger UI |
-| `GET` | `/docs/openapi.json` | OpenAPI spec |
-
----
-
-## Anti-Ban
-
-O Arcanum implementa medidas anti-ban em **todo envio de mensagem**, sem excecao:
-
-```
-1. Delay aleatorio (1.5 - 4 segundos)
-2. Mark as Read (simula leitura)
-3. Presence "digitando..." (composing)
-4. Espera proporcional ao texto (50ms por caractere, 2-8s)
-5. Presence "paused"
-6. Pausa natural (200-600ms)
-7. Envia a mensagem
-```
-
-Para audios, o passo 3 usa `"gravando..."` em vez de `"digitando..."`.
-
-### Rate Limiting
-
-- **15 mensagens por minuto** por instancia (configuravel)
-- Sliding window de 60 segundos
-- Responde HTTP 429 quando excedido
-
-### Configuracao anti-ban
-
-| Variavel | Padrao | Descricao |
-|----------|--------|-----------|
-| `GATEWAY_MIN_DELAY_MS` | 1500 | Delay minimo antes de responder |
-| `GATEWAY_MAX_DELAY_MS` | 4000 | Delay maximo antes de responder |
-| `GATEWAY_TYPING_DURATION_MS` | 2000 | Duracao minima do "digitando" |
-| `GATEWAY_MS_PER_CHAR` | 50 | Milissegundos por caractere |
-| `GATEWAY_MAX_TYPING_MS` | 8000 | Duracao maxima do "digitando" |
-| `GATEWAY_RATE_LIMIT_PER_MIN` | 15 | Mensagens por minuto por instancia |
-
----
-
-## Midia
-
-### Enviar imagem
-
-```bash
-curl -X POST http://localhost:3100/api/message/sendMedia/meu-bot \
-  -H "Content-Type: application/json" \
-  -d '{
-    "number": "5511999999999",
-    "mediatype": "image",
-    "mimetype": "image/jpeg",
-    "caption": "Confira esta imagem",
-    "media": "<base64 da imagem>"
-  }'
-```
-
-### Enviar documento (PDF)
-
-```bash
-curl -X POST http://localhost:3100/api/message/sendMedia/meu-bot \
-  -H "Content-Type: application/json" \
-  -d '{
-    "number": "5511999999999",
-    "mediatype": "document",
-    "mimetype": "application/pdf",
-    "fileName": "relatorio.pdf",
-    "media": "<base64 do PDF>"
-  }'
-```
-
-### Enviar audio
-
-```bash
-curl -X POST http://localhost:3100/api/message/sendMedia/meu-bot \
-  -H "Content-Type: application/json" \
-  -d '{
-    "number": "5511999999999",
-    "mediatype": "audio",
-    "mimetype": "audio/ogg",
-    "media": "<base64 do audio>"
-  }'
-```
-
-### Receber midia
-
-Quando uma midia e recebida, o Arcanum automaticamente:
-1. Faz download e descriptografa
-2. Converte para base64
-3. Inclui no payload do webhook no campo `media.data`
-
----
-
-## Webhook
-
-O Arcanum encaminha mensagens recebidas para a URL configurada, no formato compativel com a API Meta:
-
-```json
-{
-  "object": "whatsapp_business_account",
-  "entry": [{
-    "id": "gateway",
-    "changes": [{
-      "value": {
-        "messaging_product": "whatsapp",
-        "messages": [{
-          "from": "5511999999999",
-          "id": "msg_abc123",
-          "timestamp": "1718900000",
-          "type": "text",
-          "text": {"body": "Ola!"},
-          "media": {
-            "mimetype": "image/jpeg",
-            "data": "<base64>",
-            "filename": "foto.jpg"
-          }
-        }]
-      },
-      "field": "messages"
-    }]
-  }]
-}
-```
-
-### Seguranca
-
-Se `GATEWAY_META_APP_SECRET` estiver definido, o Arcanum assina cada webhook com HMAC-SHA256 no header `X-Hub-Signature-256`.
-
-### Configurar via API
-
-```bash
-curl -X POST http://localhost:3100/api/events/webhook/meu-bot \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://meu-backend.com/webhook",
-    "events": ["messages", "status"],
-    "enabled": true
-  }'
-```
-
----
-
-## Configuracao
-
-### Variaveis de ambiente
-
-| Variavel | Padrao | Descricao |
-|----------|--------|-----------|
-| `GATEWAY_PORT` | 3100 | Porta HTTP |
-| `GATEWAY_DB_PATH` | ./data | Diretorio para sessoes SQLite |
-| `GATEWAY_WEBHOOK_FORWARD_URL` | — | URL padrao para webhooks |
-| `GATEWAY_META_APP_SECRET` | — | Secret para assinar webhooks (HMAC) |
-
-### Configuracoes por instancia
-
-```bash
-curl -X POST http://localhost:3100/api/settings/meu-bot \
-  -H "Content-Type: application/json" \
-  -d '{
-    "rejectCalls": false,
-    "groupsIgnore": true,
-    "alwaysOnline": false,
-    "readMessages": true,
-    "readStatus": false,
-    "syncFullHistory": false
-  }'
-```
-
----
-
-## Docker
-
-### Dockerfile
-
-O Arcanum usa multi-stage build para gerar um binario estatico minimo:
-
-```dockerfile
-FROM golang:1.25-alpine AS builder
-RUN apk add --no-cache gcc musl-dev git
-WORKDIR /build
-COPY . .
-RUN go mod tidy
-RUN CGO_ENABLED=1 go build -o /gateway ./cmd/gateway
-
-FROM alpine:3.20
-COPY --from=builder /gateway /gateway
-VOLUME /data
-EXPOSE 3100
-CMD ["/gateway"]
-```
-
-### Volumes
-
-| Volume | Descricao |
-|--------|-----------|
-| `/data` | Sessoes SQLite (um `.db` por instancia). Persista este volume. |
-
----
-
-## Exemplos de Integracao
-
-### Python (requests)
-
-```python
-import requests
-
-API = "http://localhost:3100"
-
-# Criar instancia
-requests.post(f"{API}/api/instance/create", json={
-    "instanceName": "bot",
-    "webhook": "http://meu-app:8000/webhook"
-})
-
-# Conectar
-requests.get(f"{API}/api/instance/connect/bot")
-
-# Enviar mensagem
-requests.post(f"{API}/api/message/sendText/bot", json={
-    "number": "5511999999999",
-    "text": "Ola do Python!"
-})
-```
-
-### Node.js (fetch)
-
-```javascript
-const API = 'http://localhost:3100';
-
-await fetch(`${API}/api/instance/create`, {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({instanceName: 'bot', webhook: 'http://meu-app/webhook'})
-});
-
-await fetch(`${API}/api/instance/connect/bot`);
-
-await fetch(`${API}/api/message/sendText/bot`, {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({number: '5511999999999', text: 'Ola do Node!'})
-});
-```
-
----
-
-## Roadmap
-
-- [ ] Suporte a grupos (criar, info, participantes)
-- [ ] Envio de buttons e listas interativas
-- [ ] Templates (Meta Business API)
-- [ ] Proxy HTTP/SOCKS5 por instancia
-- [ ] Labels do WhatsApp
-- [ ] Business catalog
-- [ ] WebSocket para eventos em tempo real
-- [ ] Dashboard web
-- [ ] Autenticacao por API key
-- [ ] Metricas Prometheus
-- [ ] Persistencia de mensagens
-- [ ] Transcricao de audio embutida
-
----
-
-## Stack
-
-| Componente | Tecnologia |
-|-----------|------------|
-| Linguagem | Go 1.25 |
-| Engine WhatsApp | [whatsmeow](https://github.com/tulir/whatsmeow) |
-| HTTP Router | [Chi v5](https://github.com/go-chi/chi) |
-| Sessoes | SQLite (via go-sqlite3) |
-| QR Code | [go-qrcode](https://github.com/skip2/go-qrcode) |
-| Container | Docker (Alpine) |
-
----
-
-## Licenca
-
-[MIT](LICENSE) — use, modifique e distribua livremente.
-
----
-
-<p align="center">
-  Feito com Go por <a href="https://github.com/rafaeldourado9">Rafael Dourado</a>
-</p>
+[MIT](LICENSE)

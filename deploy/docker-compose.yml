@@ -1,0 +1,22 @@
+# Arcanum on this machine only (http://localhost:3100).
+#   cp ../.env.example .env   # fill GATEWAY_API_KEY and GATEWAY_DASHBOARD_PASSWORD
+#   docker compose up -d
+# For a public server with HTTPS, use docker-compose.caddy.yml instead.
+services:
+  arcanum:
+    image: ghcr.io/rafaeldourado9/arcanum:latest
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - arcanum-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+volumes:
+  arcanum-data:

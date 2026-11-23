@@ -1,0 +1,84 @@
+# Arcanum on Kubernetes: one replica (WhatsApp sessions live in the volume and must not be
+# opened by two pods at once), persistent volume, hardened pod.
+#
+#   kubectl create namespace arcanum
+#   kubectl -n arcanum create secret generic arcanum \
+#     --from-literal=GATEWAY_API_KEY="$(openssl rand -hex 32)" \
+#     --from-literal=GATEWAY_DASHBOARD_PASSWORD="$(openssl rand -hex 12)"
+#   kubectl -n arcanum apply -f kubernetes.yaml
+#
+# Expose it with your Ingress controller and TLS (not included: depends on your cluster).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: arcanum-data
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arcanum
+  labels: { app: arcanum }
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # never two pods on the same session files
+  selector:
+    matchLabels: { app: arcanum }
+  template:
+    metadata:
+      labels: { app: arcanum }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: arcanum
+          image: ghcr.io/rafaeldourado9/arcanum:latest
+          ports:
+            - containerPort: 3100
+              name: http
+          envFrom:
+            - secretRef: { name: arcanum }
+          env:
+            - { name: GATEWAY_LOG_FORMAT, value: json }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+            - { name: tmp, mountPath: /tmp }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { memory: 512Mi }
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: data
+          persistentVolumeClaim:
+            claimName: arcanum-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arcanum
+spec:
+  selector: { app: arcanum }
+  ports:
+    - name: http
+      port: 3100
+      targetPort: http

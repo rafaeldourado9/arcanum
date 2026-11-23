@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -50,7 +51,8 @@ func writeQRResponse(
 
 	if r.URL.Query().Get("format") == "png" {
 		w.Header().Set("Content-Type", "image/png")
-		w.Write(png)
+		// #nosec G705 -- bytes PNG gerados pelo proprio gateway, Content-Type fixo e nosniff global
+		_, _ = w.Write(png)
 		return
 	}
 
@@ -59,6 +61,14 @@ func writeQRResponse(
 		"status":       status,
 		"qr":           "data:image/png;base64," + b64encode(png),
 	})
+}
+
+// phoneOf returns the paired number when the provider knows it (whatsmeow does).
+func phoneOf(p provider.WhatsAppProvider) string {
+	if numbered, ok := p.(interface{ PhoneNumber() string }); ok {
+		return numbered.PhoneNumber()
+	}
+	return ""
 }
 
 func b64encode(data []byte) string {
@@ -81,15 +91,16 @@ func handleCreateInstance(mgr *instance.Manager) http.HandlerFunc {
 
 		inst, err := mgr.Create(req.InstanceName, req.Webhook, req.WebhookEvents)
 		if err != nil {
-			writeJSON(w, 409, map[string]string{"error": err.Error()})
+			status := http.StatusBadRequest
+			if errors.Is(err, instance.ErrExists) {
+				status = http.StatusConflict
+			}
+			writeJSON(w, status, map[string]string{"error": err.Error()})
 			return
 		}
 
-		writeJSON(w, 201, map[string]any{
-			"instanceName": inst.Name,
-			"status":       inst.Provider.Status(),
-			"webhook":      inst.WebhookConfig,
-		})
+		info, _ := mgr.Info(inst.Name)
+		writeJSON(w, 201, info)
 	}
 }
 
@@ -116,6 +127,12 @@ func handleConnectionState(mgr *instance.Manager) http.HandlerFunc {
 			return
 		}
 
+		if inst.Provider.Status() == provider.StatusConnected {
+			writeJSON(w, 200, map[string]any{
+				"instanceName": inst.Name, "status": provider.StatusConnected, "qr": "", "number": phoneOf(inst.Provider),
+			})
+			return
+		}
 		writeQRResponse(w, r, inst.Name, inst.Provider.Status(), inst.Provider.QRCode())
 	}
 }

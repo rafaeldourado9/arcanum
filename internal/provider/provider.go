@@ -25,13 +25,13 @@ type SendTextOptions struct {
 
 // SendMediaOptions contem os parametros para envio de midia (imagem, audio, documento, video).
 type SendMediaOptions struct {
-	To       string `json:"to"`                // Numero do destinatario
-	Type     string `json:"type"`              // Tipo: "image", "audio", "document", "video"
-	Data     []byte `json:"-"`                 // Bytes do arquivo (alternativa a URL)
-	URL      string `json:"url,omitempty"`     // URL do arquivo (alternativa a Data)
-	MimeType string `json:"mimetype"`          // MIME type (ex: image/jpeg, application/pdf)
+	To       string `json:"to"`                 // Numero do destinatario
+	Type     string `json:"type"`               // Tipo: "image", "audio", "document", "video"
+	Data     []byte `json:"-"`                  // Bytes do arquivo (alternativa a URL)
+	URL      string `json:"url,omitempty"`      // URL do arquivo (alternativa a Data)
+	MimeType string `json:"mimetype"`           // MIME type (ex: image/jpeg, application/pdf)
 	Filename string `json:"filename,omitempty"` // Nome do arquivo (para documentos)
-	Caption  string `json:"caption,omitempty"` // Legenda (para imagens e videos)
+	Caption  string `json:"caption,omitempty"`  // Legenda (para imagens e videos)
 }
 
 // SendResult e o retorno de qualquer operacao de envio bem-sucedida.
@@ -43,32 +43,44 @@ type SendResult struct {
 
 // MediaData representa midia recebida (download ja feito, descriptografado).
 type MediaData struct {
-	MimeType string `json:"mimetype"`          // MIME type do arquivo
-	Data     []byte `json:"-"`                 // Bytes brutos (nao serializado no JSON)
-	DataB64  string `json:"data,omitempty"`    // Dados em base64 (usado no webhook)
+	MimeType string `json:"mimetype"`           // MIME type do arquivo
+	Data     []byte `json:"-"`                  // Bytes brutos (nao serializado no JSON)
+	DataB64  string `json:"data,omitempty"`     // Dados em base64 (usado no webhook)
 	Filename string `json:"filename,omitempty"` // Nome original do arquivo
-	Caption  string `json:"caption,omitempty"` // Legenda (se houver)
+	Caption  string `json:"caption,omitempty"`  // Legenda (se houver)
 }
 
 // IncomingMessage representa uma mensagem recebida de qualquer tipo.
 // O campo Type indica o tipo: "text", "image", "audio", "document", "video", "sticker", "unknown".
 // Para mensagens com midia, o campo Media contem os bytes ja baixados.
 type IncomingMessage struct {
-	MessageID string     `json:"messageId"`          // ID unico da mensagem
-	From      string     `json:"from"`               // Numero do remetente
-	Timestamp int64      `json:"timestamp"`           // Timestamp Unix
+	MessageID string `json:"messageId"` // ID unico da mensagem
+	From      string `json:"from"`      // Numero do contato da conversa
+	// FromMe marca mensagem enviada PELO proprio numero conectado -- inclusive as que o
+	// atendente digita no celular. E o sinal de que um humano entrou na conversa, para a
+	// aplicacao calar o bot dela. Nesse caso From e' o contato (a conversa), nao nos.
+	FromMe    bool       `json:"fromMe"`             // Enviada pelo proprio numero
+	Timestamp int64      `json:"timestamp"`          // Timestamp Unix
 	PushName  string     `json:"pushName,omitempty"` // Nome de exibicao do remetente
 	Type      string     `json:"type"`               // Tipo da mensagem
-	// FromMe marca mensagem enviada PELO proprio numero conectado -- inclusive
-	// as que o atendente digita no celular. Encaminhar isso e o que permite a
-	// aplicacao saber que um humano entrou na conversa e calar o bot dela.
-	FromMe    bool       `json:"fromMe"`             // Enviada pelo proprio numero
 	Text      string     `json:"text,omitempty"`     // Texto (para type=text) ou caption (para midia)
 	Media     *MediaData `json:"media,omitempty"`    // Midia anexada (nil se for apenas texto)
+	Location  *Location  `json:"location,omitempty"` // Ponto compartilhado pelo mapa (type=location)
+}
+
+// Location e o ponto que o contato compartilhou pelo clipe do WhatsApp.
+type Location struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Name      string  `json:"name,omitempty"`
+	Address   string  `json:"address,omitempty"`
 }
 
 // MessageHandler e o callback chamado quando uma nova mensagem e recebida.
 type MessageHandler func(msg IncomingMessage)
+
+// PresenceHandler recebe o "digitando..." de um contato: composing true ao comecar, false ao parar.
+type PresenceHandler func(from string, composing bool)
 
 // WhatsAppProvider e a interface principal que qualquer engine de WhatsApp deve implementar.
 // O Arcanum usa essa interface para desacoplar a API REST do protocolo subjacente.
@@ -82,8 +94,15 @@ type WhatsAppProvider interface {
 	Name() string
 	// Connect inicia a conexao com o WhatsApp. Pode gerar QR code.
 	Connect() error
-	// Disconnect encerra a conexao.
+	// Disconnect encerra a conexao (a sessao continua pareada e pode reconectar).
 	Disconnect() error
+	// Close encerra a sessao de vez e libera os recursos (banco, conexoes).
+	Close() error
+	// Unlink desfaz o pareamento: o aparelho some de "Aparelhos conectados" no celular.
+	// Usado ao apagar a instancia. Sem conexao, nao faz nada.
+	Unlink() error
+	// PhoneNumber e o numero pareado (so digitos), vazio antes do pareamento.
+	PhoneNumber() string
 	// Status retorna o estado atual da conexao.
 	Status() ConnectionStatus
 	// QRCode retorna o QR code atual como string (vazio se nao houver).
@@ -100,6 +119,8 @@ type WhatsAppProvider interface {
 
 	// OnMessage registra o callback para mensagens recebidas.
 	OnMessage(handler MessageHandler)
+	// OnPresence registra o callback do "digitando..." dos contatos que escreveram.
+	OnPresence(handler PresenceHandler)
 
 	// SendLocation envia uma localizacao GPS.
 	SendLocation(opts SendLocationOptions) (SendResult, error)
@@ -126,17 +147,17 @@ type WhatsAppProvider interface {
 
 // NumberCheck e o resultado da verificacao de um numero no WhatsApp.
 type NumberCheck struct {
-	Number string `json:"number"` // Numero consultado
-	Exists bool   `json:"exists"` // true se o numero possui WhatsApp
+	Number string `json:"number"`        // Numero consultado
+	Exists bool   `json:"exists"`        // true se o numero possui WhatsApp
 	JID    string `json:"jid,omitempty"` // JID do WhatsApp (se existir)
 }
 
 // SendLocationOptions contem os parametros para envio de localizacao.
 type SendLocationOptions struct {
-	To        string  `json:"to"`                 // Numero do destinatario
-	Latitude  float64 `json:"latitude"`           // Latitude GPS
-	Longitude float64 `json:"longitude"`          // Longitude GPS
-	Name      string  `json:"name,omitempty"`     // Nome do local
+	To        string  `json:"to"`                // Numero do destinatario
+	Latitude  float64 `json:"latitude"`          // Latitude GPS
+	Longitude float64 `json:"longitude"`         // Longitude GPS
+	Name      string  `json:"name,omitempty"`    // Nome do local
 	Address   string  `json:"address,omitempty"` // Endereco textual
 }
 

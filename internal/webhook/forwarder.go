@@ -16,10 +16,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/rafaeldourado9/arcanum/internal/media"
+	"github.com/rafaeldourado9/arcanum/internal/metrics"
 	"github.com/rafaeldourado9/arcanum/internal/provider"
 )
 
@@ -28,6 +30,7 @@ type Forwarder struct {
 	format string
 	secret string
 	client *http.Client
+	hist   *History
 }
 
 func NewForwarder(url, format, secret string) *Forwarder {
@@ -38,8 +41,35 @@ func NewForwarder(url, format, secret string) *Forwarder {
 		url:    url,
 		format: format,
 		secret: secret,
-		client: &http.Client{Timeout: 30 * time.Second},
+		client: safeClient(30 * time.Second),
+		hist:   NewHistory(),
 	}
+}
+
+// WithHistory troca o historico de entregas (a instancia mantem o mesmo historico quando a
+// URL do webhook muda).
+func (f *Forwarder) WithHistory(h *History) *Forwarder {
+	if h != nil {
+		f.hist = h
+	}
+	return f
+}
+
+// History sao as ultimas entregas desta instancia.
+func (f *Forwarder) History() *History { return f.hist }
+
+// Test manda um evento "test" assinado, como uma entrega real, e devolve o resultado: o
+// painel usa para conferir URL, assinatura e resposta do sistema do cliente.
+func (f *Forwarder) Test(instance string) Delivery {
+	if f.url == "" {
+		return Delivery{Time: time.Now(), Event: "test", Error: "no webhook URL configured"}
+	}
+	d, _ := f.post("test", map[string]any{
+		"event":     "test",
+		"instance":  instance,
+		"timestamp": fmt.Sprintf("%d", time.Now().Unix()),
+	})
+	return d
 }
 
 func (f *Forwarder) Forward(msg provider.IncomingMessage) {
@@ -55,16 +85,73 @@ func (f *Forwarder) Forward(msg provider.IncomingMessage) {
 		payload = f.buildSimplePayload(msg)
 	}
 
-	body, err := json.Marshal(payload)
+	metrics.MessagesReceived.Add(1)
+	d, err := f.post("message", payload)
+	status := d.Status
 	if err != nil {
-		log.Printf("[webhook] marshal error: %v", err)
+		slog.Warn("webhook forward failed", "type", msg.Type, "error", err)
 		return
 	}
+	// Sem o numero do contato no log normal (dado pessoal); em debug ele aparece.
+	slog.Debug("webhook forwarded", "type", msg.Type, "from", msg.From, "status", status, "format", f.format)
+	if status < 200 || status >= 300 {
+		slog.Warn("webhook answered non-2xx", "type", msg.Type, "status", status)
+	}
+}
 
+// ReportSendFailure avisa o backend que um envio foi abandonado depois das tentativas. Vai para
+// a mesma URL da instância, com a mesma assinatura: o backend descobre a empresa pela URL.
+func (f *Forwarder) ReportSendFailure(to, text string) {
+	if f.url == "" {
+		return
+	}
+	d, err := f.post("send_failed", map[string]any{"event": "send_failed", "to": to, "text": text})
+	if err != nil {
+		log.Printf("[webhook] send failure report failed: %v", err)
+		return
+	}
+	log.Printf("[webhook] send failure reported -> HTTP %d", d.Status)
+}
+
+// ReportTyping repassa o "digitando..." do cliente: o backend segura a resposta do agente
+// enquanto ele escreve. Sem log por evento: chega um a cada poucos segundos por conversa.
+func (f *Forwarder) ReportTyping(from string, composing bool) {
+	if f.url == "" {
+		return
+	}
+	state := "paused"
+	if composing {
+		state = "composing"
+	}
+	// "" no evento: typing chega a cada poucos segundos e afogaria o historico do painel.
+	if _, err := f.post("", map[string]any{"event": "typing", "from": from, "state": state}); err != nil {
+		log.Printf("[webhook] typing report failed: %v", err)
+	}
+}
+
+// post manda o JSON assinado (HMAC-SHA256 em X-Hub-Signature-256, quando há segredo) e,
+// com event nao vazio, registra a entrega no historico.
+func (f *Forwarder) post(event string, payload map[string]any) (Delivery, error) {
+	start := time.Now()
+	d := Delivery{Time: start, Event: event}
+	record := func(err error) (Delivery, error) {
+		d.DurationMs = time.Since(start).Milliseconds()
+		if err != nil {
+			d.Error = err.Error()
+		}
+		if event != "" && f.hist != nil {
+			f.hist.add(d)
+		}
+		return d, err
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return record(err)
+	}
 	req, err := http.NewRequest(http.MethodPost, f.url, bytes.NewReader(body))
 	if err != nil {
-		log.Printf("[webhook] request error: %v", err)
-		return
+		return record(err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -77,12 +164,18 @@ func (f *Forwarder) Forward(msg provider.IncomingMessage) {
 
 	resp, err := f.client.Do(req)
 	if err != nil {
-		log.Printf("[webhook] forward failed: %v", err)
-		return
+		metrics.WebhookFailed.Add(1)
+		return record(err)
 	}
-	resp.Body.Close()
-
-	log.Printf("[webhook] forwarded %s from %s -> HTTP %d (%s)", msg.Type, msg.From, resp.StatusCode, f.format)
+	_ = resp.Body.Close()
+	d.Status = resp.StatusCode
+	d.OK = resp.StatusCode >= 200 && resp.StatusCode < 300
+	if d.OK {
+		metrics.WebhookDelivered.Add(1)
+	} else {
+		metrics.WebhookFailed.Add(1)
+	}
+	return record(nil)
 }
 
 // buildSimplePayload cria um payload flat compatível com agent-core POST /message.
@@ -93,13 +186,17 @@ func (f *Forwarder) buildSimplePayload(msg provider.IncomingMessage) map[string]
 		"type":       msg.Type,
 		"message_id": msg.MessageID,
 		"timestamp":  fmt.Sprintf("%d", msg.Timestamp),
-		// Sempre presente, inclusive false: o consumidor precisa distinguir
-		// "nao veio de mim" de "campo ausente porque a versao e' antiga".
-		"from_me":    msg.FromMe,
+		// Sempre presente, inclusive false: o consumidor precisa distinguir "nao veio de
+		// mim" de "campo ausente porque a versao e' antiga".
+		"from_me": msg.FromMe,
 	}
 
 	if msg.PushName != "" {
 		payload["push_name"] = msg.PushName
+	}
+
+	if msg.Location != nil {
+		payload["location"] = locationPayload(msg.Location)
 	}
 
 	if msg.Media != nil {
@@ -122,6 +219,7 @@ func (f *Forwarder) buildMetaPayload(msg provider.IncomingMessage) map[string]an
 		"id":        msg.MessageID,
 		"timestamp": fmt.Sprintf("%d", msg.Timestamp),
 		"type":      msg.Type,
+		"from_me":   msg.FromMe,
 	}
 
 	if msg.Text != "" {
@@ -140,6 +238,12 @@ func (f *Forwarder) buildMetaPayload(msg provider.IncomingMessage) map[string]an
 			mediaPayload["caption"] = msg.Media.Caption
 		}
 		messagePayload["media"] = mediaPayload
+	}
+
+	// Mesmo formato da Meta ({"type": "location", "location": {...}}): o backend lê os dois
+	// provedores com o mesmo parser.
+	if msg.Location != nil {
+		messagePayload["location"] = locationPayload(msg.Location)
 	}
 
 	contacts := []map[string]any{{"wa_id": msg.From}}
@@ -169,4 +273,15 @@ func (f *Forwarder) buildMetaPayload(msg provider.IncomingMessage) map[string]an
 			},
 		},
 	}
+}
+
+func locationPayload(loc *provider.Location) map[string]any {
+	payload := map[string]any{"latitude": loc.Latitude, "longitude": loc.Longitude}
+	if loc.Name != "" {
+		payload["name"] = loc.Name
+	}
+	if loc.Address != "" {
+		payload["address"] = loc.Address
+	}
+	return payload
 }

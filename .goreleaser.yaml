@@ -1,0 +1,56 @@
+# Binarios prontos (Linux, macOS, Windows; amd64 e arm64) a cada tag vX.Y.Z.
+# Sem CGO: o SQLite e o modernc (Go puro), entao tudo compila de um runner so.
+version: 2
+
+project_name: arcanum
+
+before:
+  hooks:
+    # O painel e embutido no binario: compila antes do Go.
+    - sh -c "cd web && npm ci --no-audit --no-fund && npm run build"
+
+builds:
+  - id: arcanum
+    main: ./cmd/gateway
+    binary: arcanum
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X github.com/rafaeldourado9/arcanum/internal/api.Version={{ .Tag }}
+
+archives:
+  - id: arcanum
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "arcanum_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - .env.example
+      - deploy/systemd/arcanum.service
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^chore:"
+
+release:
+  draft: false
+  prerelease: auto
+  footer: |
+    **Docker:** `docker pull ghcr.io/rafaeldourado9/arcanum:{{ .Version }}`
+    **Install script (Linux/macOS):** `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh`
+    Verify downloads against `checksums.txt`. Guide: https://arcanum.rafaeldourado.tech

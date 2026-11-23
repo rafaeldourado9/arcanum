@@ -15,6 +15,7 @@ type Config struct {
 
 	// WebhookForwardURL e a URL padrao para encaminhar mensagens recebidas via webhook.
 	// Pode ser sobrescrita por instancia via API (GATEWAY_WEBHOOK_FORWARD_URL).
+	// Aceita o marcador {instance}, trocado pelo nome da instancia.
 	WebhookForwardURL string
 
 	// WebhookFormat define o formato do webhook: "meta" (compativel com Meta Cloud API)
@@ -48,6 +49,33 @@ type Config struct {
 
 	// RateLimitPerMin define o numero maximo de mensagens enviadas por minuto por instancia.
 	RateLimitPerMin int
+
+	// APIKey e a chave exigida em toda rota da API (header X-Api-Key ou
+	// Authorization: Bearer). Vazia: o gateway gera uma ao subir e mostra no log, para
+	// nunca ficar aberto por esquecimento (GATEWAY_API_KEY).
+	APIKey string
+
+	// AuthDisabled desliga a autenticacao. So para desenvolvimento local, nunca em
+	// servidor exposto (GATEWAY_AUTH_DISABLED=true).
+	AuthDisabled bool
+
+	// LogFormat: "text" (padrao, legivel) ou "json" (para coletores de log)
+	// (GATEWAY_LOG_FORMAT).
+	LogFormat string
+
+	// LogLevel: "debug", "info" (padrao), "warn" ou "error" (GATEWAY_LOG_LEVEL).
+	LogLevel string
+
+	// MaxBodyMB e o tamanho maximo de uma requisicao, em MB (midia em base64 entra aqui)
+	// (GATEWAY_MAX_BODY_MB, padrao: 64).
+	MaxBodyMB int
+
+	// DashboardEnabled serve o painel web em / (GATEWAY_DASHBOARD, padrao: true).
+	DashboardEnabled bool
+
+	// DashboardPassword e a senha do login do painel. Vazia: o login usa a propria
+	// GATEWAY_API_KEY (GATEWAY_DASHBOARD_PASSWORD).
+	DashboardPassword string
 }
 
 // Load carrega a configuracao a partir das variaveis de ambiente.
@@ -66,7 +94,25 @@ func Load() *Config {
 		MsPerChar:        envInt("GATEWAY_MS_PER_CHAR", 50),
 		MaxTypingMs:      envInt("GATEWAY_MAX_TYPING_MS", 8000),
 		RateLimitPerMin:  envInt("GATEWAY_RATE_LIMIT_PER_MIN", 15),
+
+		APIKey:       envStr("GATEWAY_API_KEY", ""),
+		AuthDisabled: envBool("GATEWAY_AUTH_DISABLED", false),
+		LogFormat:    envStr("GATEWAY_LOG_FORMAT", "text"),
+		LogLevel:     envStr("GATEWAY_LOG_LEVEL", "info"),
+		MaxBodyMB:    envInt("GATEWAY_MAX_BODY_MB", 64),
+
+		DashboardEnabled:  envBool("GATEWAY_DASHBOARD", true),
+		DashboardPassword: envStr("GATEWAY_DASHBOARD_PASSWORD", ""),
 	}
+}
+
+func envBool(key string, fallback bool) bool {
+	if v := os.Getenv(key); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			return b
+		}
+	}
+	return fallback
 }
 
 func envStr(key, fallback string) string {

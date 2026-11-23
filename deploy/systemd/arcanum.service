@@ -1,0 +1,44 @@
+[Unit]
+Description=Arcanum WhatsApp gateway
+Documentation=https://arcanum.rafaeldourado.tech
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=arcanum
+Group=arcanum
+EnvironmentFile=/etc/arcanum/arcanum.env
+ExecStart=/usr/local/bin/arcanum
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+# Hardening: the gateway only needs the network and its own data folder.
+StateDirectory=arcanum
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

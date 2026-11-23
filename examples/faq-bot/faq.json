@@ -1,0 +1,26 @@
+{
+  "fallback": "Thanks for your message! A person from our team will reply soon. Meanwhile you can ask about: prices, opening hours, address or delivery.",
+  "only_text": "I can only read text for now. Please type your question.",
+  "answers": [
+    {
+      "keywords": ["price", "prices", "cost", "how much", "preco", "valor", "quanto custa"],
+      "reply": "Our plans start at $19/month. Full price list: https://example.com/pricing"
+    },
+    {
+      "keywords": ["hours", "open", "opening", "horario", "abre", "funcionamento"],
+      "reply": "We are open Monday to Friday, 8am to 6pm, and Saturday until noon."
+    },
+    {
+      "keywords": ["address", "where", "location", "endereco", "onde fica"],
+      "reply": "We are at 1000 Example Avenue. Map: https://maps.example.com/acme"
+    },
+    {
+      "keywords": ["delivery", "shipping", "entrega", "frete"],
+      "reply": "Delivery takes 1 to 3 business days. You get the tracking code by WhatsApp."
+    },
+    {
+      "keywords": ["human", "agent", "person", "atendente", "humano", "pessoa"],
+      "reply": "Sure, I am calling someone from the team. Please wait a moment."
+    }
+  ]
+}

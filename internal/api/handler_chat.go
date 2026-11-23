@@ -161,8 +161,9 @@ func handleArchiveChat(mgr *instance.Manager) http.HandlerFunc {
 			return
 		}
 
-		// whatsmeow doesn't expose archive directly — placeholder
-		writeJSON(w, 200, map[string]any{"ok": true, "chat": req.Chat, "archived": req.Archive})
+		// Ainda nao implementado. Antes respondia "ok" sem arquivar nada, o que enganava quem
+		// integrava; 501 deixa claro.
+		writeJSON(w, http.StatusNotImplemented, map[string]any{"error": "archiveChat is not implemented yet", "chat": req.Chat})
 	}
 }
 

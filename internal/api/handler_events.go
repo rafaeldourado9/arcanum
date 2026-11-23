@@ -2,57 +2,97 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rafaeldourado9/arcanum/internal/instance"
-	"github.com/rafaeldourado9/arcanum/internal/webhook"
 )
+
+// notFoundOr400 responde 404 para instancia inexistente e 400 para o resto (validacao).
+func notFoundOr400(w http.ResponseWriter, err error) {
+	status := http.StatusBadRequest
+	if errors.Is(err, instance.ErrNotFound) {
+		status = http.StatusNotFound
+	}
+	writeJSON(w, status, map[string]string{"error": err.Error()})
+}
 
 func handleGetWebhook(mgr *instance.Manager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		name := chi.URLParam(r, "instance")
-		inst, err := mgr.Get(name)
+		inst, err := mgr.Get(chi.URLParam(r, "instance"))
 		if err != nil {
 			writeJSON(w, 404, map[string]string{"error": err.Error()})
 			return
 		}
-		writeJSON(w, 200, inst.WebhookConfig)
+		writeJSON(w, 200, inst.WebhookConfig())
 	}
 }
 
 type setWebhookReq struct {
-	URL     string   `json:"url"`
+	URL     *string  `json:"url"`
 	Events  []string `json:"events"`
 	Enabled *bool    `json:"enabled"`
 }
 
-func handleSetWebhook(mgr *instance.Manager, secret string) http.HandlerFunc {
+func handleSetWebhook(mgr *instance.Manager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		name := chi.URLParam(r, "instance")
-		inst, err := mgr.Get(name)
-		if err != nil {
-			writeJSON(w, 404, map[string]string{"error": err.Error()})
-			return
-		}
-
 		var req setWebhookReq
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			writeJSON(w, 400, map[string]string{"error": "Invalid JSON"})
 			return
 		}
+		cfg, err := mgr.UpdateWebhook(chi.URLParam(r, "instance"), instance.WebhookUpdate{
+			URL: req.URL, Events: req.Events, Enabled: req.Enabled,
+		})
+		if err != nil {
+			notFoundOr400(w, err)
+			return
+		}
+		writeJSON(w, 200, cfg)
+	}
+}
 
-		if req.URL != "" {
-			inst.WebhookConfig.URL = req.URL
-			inst.Webhook = webhook.NewForwarder(req.URL, "simple", secret)
+// handleTestWebhook manda um evento "test" assinado e devolve o resultado da entrega.
+func handleTestWebhook(mgr *instance.Manager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		d, err := mgr.TestWebhook(chi.URLParam(r, "instance"))
+		if err != nil {
+			notFoundOr400(w, err)
+			return
 		}
-		if len(req.Events) > 0 {
-			inst.WebhookConfig.Events = req.Events
-		}
-		if req.Enabled != nil {
-			inst.WebhookConfig.Enabled = *req.Enabled
-		}
+		writeJSON(w, 200, d)
+	}
+}
 
-		writeJSON(w, 200, inst.WebhookConfig)
+// handleWebhookDeliveries lista as ultimas entregas (sem corpo: so evento e resultado).
+func handleWebhookDeliveries(mgr *instance.Manager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		list, err := mgr.Deliveries(chi.URLParam(r, "instance"))
+		if err != nil {
+			notFoundOr400(w, err)
+			return
+		}
+		writeJSON(w, 200, map[string]any{"deliveries": list})
+	}
+}
+
+func handleExportWebhooks(mgr *instance.Manager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Disposition", `attachment; filename="arcanum-webhooks.json"`)
+		writeJSON(w, 200, map[string]any{"version": 1, "webhooks": mgr.ExportWebhooks()})
+	}
+}
+
+func handleImportWebhooks(mgr *instance.Manager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			Webhooks map[string]instance.WebhookConfig `json:"webhooks"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Webhooks == nil {
+			writeJSON(w, 400, map[string]string{"error": `expected {"webhooks": {"<instance>": {"url": "...", "events": [...], "enabled": true}}}`})
+			return
+		}
+		writeJSON(w, 200, mgr.ImportWebhooks(req.Webhooks))
 	}
 }

@@ -1,0 +1,109 @@
+/* Arcanum docs: neutral black and white, same base as RD Gestao / EasySun
+   (Plus Jakarta Sans, ink #171717, white surfaces; dark #141414). */
+
+:root,
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #171717;
+  --md-primary-fg-color--light: #404040;
+  --md-primary-fg-color--dark: #0a0a0a;
+  --md-primary-bg-color: #ffffff;
+  --md-accent-fg-color: #171717;
+  --md-default-bg-color: #ffffff;
+  --md-default-fg-color: #171717;
+  --md-default-fg-color--light: #525252;
+  --md-default-fg-color--lighter: #a3a3a3;
+  --md-code-bg-color: #fafafa;
+  --md-typeset-a-color: #171717;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-hue: 0;
+  --md-primary-fg-color: #141414;
+  --md-primary-fg-color--light: #232323;
+  --md-primary-fg-color--dark: #0a0a0a;
+  --md-primary-bg-color: #ededed;
+  --md-accent-fg-color: #ededed;
+  --md-default-bg-color: #141414;
+  --md-default-fg-color: #ededed;
+  --md-default-fg-color--light: #a3a3a3;
+  --md-default-fg-color--lighter: #6b6b6b;
+  --md-code-bg-color: #1a1a1a;
+  --md-typeset-a-color: #ededed;
+}
+
+/* Header and tabs: flat, with a hairline instead of a shadow. */
+.md-header,
+.md-tabs {
+  box-shadow: none;
+  border-bottom: 1px solid rgba(127, 127, 127, 0.18);
+}
+
+.md-typeset a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(127, 127, 127, 0.45);
+}
+.md-typeset a:hover {
+  text-decoration-color: currentColor;
+}
+
+.md-typeset h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--md-default-fg-color);
+}
+.md-typeset h2,
+.md-typeset h3 {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.md-typeset code {
+  border-radius: 6px;
+}
+
+/* Admonitions in neutral tones, color only in the left rule. */
+.md-typeset .admonition,
+.md-typeset details {
+  border-width: 1px;
+  border-left-width: 3px;
+  box-shadow: none;
+  border-radius: 8px;
+}
+
+/* Hero on the home page. */
+.arcanum-hero {
+  padding: 2.5rem 0 1rem;
+}
+.arcanum-hero h1 {
+  font-size: 2.4rem;
+  line-height: 1.15;
+  margin-bottom: 0.6rem;
+}
+.arcanum-hero p {
+  font-size: 1.05rem;
+  color: var(--md-default-fg-color--light);
+  max-width: 40rem;
+}
+.md-typeset .md-button {
+  border-radius: 8px;
+  font-weight: 600;
+}
+.md-typeset .md-button--primary {
+  background: var(--md-default-fg-color);
+  border-color: var(--md-default-fg-color);
+  color: var(--md-default-bg-color);
+}
+
+/* Feature grid without heavy cards: thin rules only. */
+.md-typeset .grid.cards > ul > li,
+.md-typeset .grid > .card {
+  border: 1px solid rgba(127, 127, 127, 0.2);
+  border-radius: 10px;
+  box-shadow: none;
+}
+.md-typeset .grid.cards > ul > li:hover {
+  border-color: rgba(127, 127, 127, 0.45);
+  box-shadow: none;
+}

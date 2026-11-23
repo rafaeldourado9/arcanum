@@ -37,6 +37,7 @@ type sendTextReq struct {
 }
 
 func handleSendText(mgr *instance.Manager, cfg *config.Config) http.HandlerFunc {
+	chats := antiban.NewChatQueue()
 	return func(w http.ResponseWriter, r *http.Request) {
 		inst, ok := requireConnected(mgr, r, w)
 		if !ok {
@@ -53,13 +54,18 @@ func handleSendText(mgr *instance.Manager, cfg *config.Config) http.HandlerFunc 
 		// design — it paces what WhatsApp sees, it's not part of the caller's HTTP
 		// contract. Acknowledge immediately and run the humanized send in the
 		// background so callers never need a long timeout to get a reply queued.
-		go func() {
+		// Same chat, one send after the other: a reply split in parts must arrive in order.
+		chats.Run(chi.URLParam(r, "instance")+":"+req.Number, func() {
 			antiban.HumanizedSend(inst.Provider, req.Number, req.Text, cfg)
-			sendWithRetry(req.Number, func() error {
+			err := sendWithRetry(req.Number, func() error {
 				_, err := inst.Provider.SendText(provider.SendTextOptions{To: req.Number, Text: req.Text})
 				return err
 			})
-		}()
+			// Gave up: the backend records it under "Falhas de envio" (it used to vanish here).
+			if err != nil {
+				inst.ReportSendFailure(req.Number, req.Text)
+			}
+		})
 
 		writeJSON(w, 202, map[string]any{"ok": true, "status": "queued"})
 	}

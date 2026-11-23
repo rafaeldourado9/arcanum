@@ -2,3 +2,26 @@ data/
 /gateway
 *.db
 CLAUDE.md
+
+# Segredos e sessoes: nunca no repositorio
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.sqlite
+*.db-shm
+*.db-wal
+
+# Site gerado pelo mkdocs
+site/
+
+# Build do painel (gerado por web/: npm run build)
+internal/dashboard/dist/*
+!internal/dashboard/dist/.gitkeep
+web/node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/

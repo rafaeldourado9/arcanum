@@ -1,0 +1,31 @@
+# Arcanum + the FAQ bot, wired together.
+#   cp .env.example .env    # fill the three secrets
+#   docker compose up -d --build
+# Dashboard: http://localhost:3100 (create the session "demo" and scan the QR code)
+services:
+  arcanum:
+    image: ghcr.io/rafaeldourado9/arcanum:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3100:3100"
+    environment:
+      GATEWAY_API_KEY: ${ARCANUM_KEY:?set ARCANUM_KEY in .env}
+      GATEWAY_DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:?set DASHBOARD_PASSWORD in .env}
+      GATEWAY_META_APP_SECRET: ${ARCANUM_WEBHOOK_SECRET:?set ARCANUM_WEBHOOK_SECRET in .env}
+      # every session delivers to the bot; {instance} becomes the session name
+      GATEWAY_WEBHOOK_FORWARD_URL: http://bot:8000/webhooks/whatsapp/{instance}
+      GATEWAY_WEBHOOK_FORMAT: simple
+    volumes:
+      - arcanum-data:/data
+
+  bot:
+    build: .
+    restart: unless-stopped
+    environment:
+      ARCANUM_URL: http://arcanum:3100
+      ARCANUM_KEY: ${ARCANUM_KEY}
+      ARCANUM_WEBHOOK_SECRET: ${ARCANUM_WEBHOOK_SECRET}
+      HUMAN_PAUSE_MINUTES: "30"
+
+volumes:
+  arcanum-data:

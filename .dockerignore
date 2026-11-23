@@ -1,0 +1,13 @@
+.git
+.github
+**/node_modules
+internal/dashboard/dist/*
+!internal/dashboard/dist/.gitkeep
+site
+docs
+data
+*.db
+*.db-*
+.env
+.env.*
+!.env.example
