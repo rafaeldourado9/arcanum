@@ -5,6 +5,7 @@ server; they all run the same thing.
 
 | Method | Best for |
 |---|---|
+| [Windows](#windows-powershell) | Windows: one PowerShell command, works even when scripts are disabled. |
 | [npx](#npx-nodejs) | Anyone with Node.js: one command, nothing else to install. |
 | [Docker](#docker) | Most setups. One command, easy updates. |
 | [Install script](#install-script-linux-macos) | A Linux or macOS machine without Docker. |
@@ -15,6 +16,29 @@ server; they all run the same thing.
 
 Whatever you choose, open **`http://<server>:3100`** for the [dashboard](dashboard.md) and
 **`/docs`** for the interactive API.
+
+## Windows (PowerShell)
+
+Open **PowerShell** and paste:
+
+```powershell
+irm https://arcanum.rafaeldourado.tech/install.ps1 | iex
+```
+
+It works **even when running scripts is disabled** (the Windows default) and needs no
+administrator rights. The installer downloads `arcanum.exe` from the GitHub release, **checks its
+SHA-256**, installs it to `%LOCALAPPDATA%\Programs\Arcanum` and adds that folder to your user
+PATH. Then:
+
+```powershell
+$env:GATEWAY_DASHBOARD_PASSWORD = "choose-a-long-password"
+$env:GATEWAY_DB_PATH = "$env:LOCALAPPDATA\Arcanum"
+arcanum
+```
+
+If `arcanum` is not found, open a new terminal (PATH changes apply to new windows). Options
+before running: `$env:ARCANUM_VERSION = "v1.1.0"` pins a release, `$env:ARCANUM_INSTALL_DIR`
+changes the folder and `$env:ARCANUM_NO_PATH = "1"` leaves the PATH alone.
 
 ## npx (Node.js)
 
@@ -42,10 +66,12 @@ cd arcanum && docker compose up -d
 
 `ARCANUM_VERSION=v1.1.0` pins a release; `ARCANUM_HOME` changes where binaries and data go.
 
-!!! warning "Windows PowerShell"
-    If you see *"running scripts is disabled on this system"*, use **`npx.cmd`** instead of
-    `npx` (`npx.cmd github:rafaeldourado9/arcanum`), run it from Command Prompt (cmd), or allow
-    scripts for your user once: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+!!! warning "npx on Windows PowerShell"
+    In PowerShell, `npx` is a `.ps1` script and Windows blocks scripts by default (*"running
+    scripts is disabled on this system"*). Use **`npx.cmd`** instead of `npx`
+    (`npx.cmd github:rafaeldourado9/arcanum`), run it from Command Prompt (cmd), or use the
+    [Windows installer](#windows-powershell). To allow scripts for your user once:
+    `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 ## Docker
 

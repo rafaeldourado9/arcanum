@@ -5,6 +5,7 @@ o seu servidor; todos rodam a mesma coisa.
 
 | Jeito | Melhor para |
 |---|---|
+| [Windows](#windows-powershell) | Windows: um comando no PowerShell, funciona mesmo com scripts bloqueados. |
 | [npx](#npx-nodejs) | Quem tem Node.js: um comando, mais nada para instalar. |
 | [Docker](#docker) | A maioria dos casos. Um comando, atualização fácil. |
 | [Script de instalação](#script-de-instalacao-linux-macos) | Linux ou macOS sem Docker. |
@@ -15,6 +16,28 @@ o seu servidor; todos rodam a mesma coisa.
 
 Seja qual for, abra **`http://<servidor>:3100`** para o [painel](dashboard.md) e **`/docs`**
 para a API interativa.
+
+## Windows (PowerShell)
+
+Abra o **PowerShell** e cole:
+
+```powershell
+irm https://arcanum.rafaeldourado.tech/install.ps1 | iex
+```
+
+Funciona **mesmo com a execução de scripts desabilitada** (o padrão do Windows) e não precisa de
+administrador. O instalador baixa o `arcanum.exe` da release do GitHub, **confere o SHA-256**,
+instala em `%LOCALAPPDATA%\Programs\Arcanum` e coloca essa pasta no PATH do seu usuário. Depois:
+
+```powershell
+$env:GATEWAY_DASHBOARD_PASSWORD = "escolha-uma-senha-longa"
+$env:GATEWAY_DB_PATH = "$env:LOCALAPPDATA\Arcanum"
+arcanum
+```
+
+Se `arcanum` não for encontrado, abra um terminal novo (o PATH só atualiza em janelas novas).
+Opções antes de rodar: `$env:ARCANUM_VERSION = "v1.1.0"` fixa a versão,
+`$env:ARCANUM_INSTALL_DIR` muda a pasta e `$env:ARCANUM_NO_PATH = "1"` não mexe no PATH.
 
 ## npx (Node.js)
 
@@ -41,10 +64,11 @@ cd arcanum && docker compose up -d
 
 `ARCANUM_VERSION=v1.1.0` fixa uma versão; `ARCANUM_HOME` muda onde ficam binários e dados.
 
-!!! warning "Windows PowerShell"
-    Se aparecer *"a execução de scripts foi desabilitada neste sistema"*, use **`npx.cmd`** no
-    lugar de `npx` (`npx.cmd github:rafaeldourado9/arcanum`), rode pelo Prompt de Comando (cmd),
-    ou libere scripts só para o seu usuário, uma vez:
+!!! warning "npx no Windows PowerShell"
+    No PowerShell, o `npx` é um script `.ps1`, e o Windows bloqueia scripts por padrão (*"a execução
+    de scripts foi desabilitada neste sistema"*). Use **`npx.cmd`** no lugar de `npx`
+    (`npx.cmd github:rafaeldourado9/arcanum`), rode pelo Prompt de Comando (cmd), ou use o
+    [instalador do Windows](#windows-powershell). Para liberar scripts só para o seu usuário, uma vez:
     `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 ## Docker

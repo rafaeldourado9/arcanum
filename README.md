@@ -63,6 +63,7 @@
 
 | | Comando |
 |---|---|
+| **Windows** (PowerShell) | `irm https://arcanum.rafaeldourado.tech/install.ps1 \| iex` |
 | **npx** (Node.js 18+) | `npx github:rafaeldourado9/arcanum` |
 | **Projeto novo** (Compose + chaves geradas) | `npx github:rafaeldourado9/arcanum init` |
 | **Docker** | `docker run -p 3100:3100 -v arcanum-data:/data ghcr.io/rafaeldourado9/arcanum` |
@@ -70,7 +71,8 @@
 | **Serviço do systemd** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh -s -- --systemd` |
 | **Binário** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
 
-No Windows PowerShell, use `npx.cmd` no lugar de `npx` (ou rode no cmd).
+No Windows, o instalador do PowerShell funciona mesmo com scripts bloqueados. Para usar o npx
+no PowerShell, digite `npx.cmd` no lugar de `npx`.
 
 Depois abra **http://localhost:3100**. Detalhes: [Instalação](https://arcanum.rafaeldourado.tech/installation/).
 
