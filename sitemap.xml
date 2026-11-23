@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/anti-ban/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/anti-ban/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/anti-ban/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/api-reference/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/api-reference/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/api-reference/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/authentication/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/authentication/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/authentication/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/configuration/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/configuration/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/dashboard/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/dashboard/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/dashboard/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/deployment/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/deployment/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/deployment/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/getting-started/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/installation/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/installation/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/installation/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/messages/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/messages/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/messages/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/monitoring/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/monitoring/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/monitoring/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/security/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/security/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/security/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/sessions/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/sessions/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/sessions/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/troubleshooting/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/webhooks/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/webhooks/"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/webhooks/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/anti-ban/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/anti-ban/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/anti-ban/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/api-reference/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/api-reference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/api-reference/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/authentication/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/authentication/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/authentication/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/configuration/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/configuration/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/dashboard/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/dashboard/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/dashboard/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/deployment/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/deployment/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/deployment/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/getting-started/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/getting-started/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/getting-started/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/installation/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/installation/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/messages/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/messages/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/messages/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/monitoring/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/monitoring/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/monitoring/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/security/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/security/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/security/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/sessions/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/sessions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/sessions/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/troubleshooting/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://arcanum.rafaeldourado.tech/pt/webhooks/</loc>
+        <lastmod>2026-11-23</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://arcanum.rafaeldourado.tech/pt/webhooks/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://arcanum.rafaeldourado.tech/webhooks/"/>
+    </url>
+</urlset>
