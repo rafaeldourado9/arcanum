@@ -21,7 +21,7 @@ Whatever you choose, open **`http://<server>:3100`** for the [dashboard](dashboa
 The quickest way if you have Node.js 18+. No Docker, no dependencies:
 
 ```bash
-npx arcanum-gateway
+npx github:rafaeldourado9/arcanum
 ```
 
 On first run it downloads the binary for your system from the GitHub release, **checks its
@@ -30,13 +30,13 @@ SHA-256** against `checksums.txt` and keeps it in `~/.arcanum/`. The dashboard o
 other install:
 
 ```bash
-GATEWAY_API_KEY="$(openssl rand -hex 32)" GATEWAY_DASHBOARD_PASSWORD="a-long-password" npx arcanum-gateway
+GATEWAY_API_KEY="$(openssl rand -hex 32)" GATEWAY_DASHBOARD_PASSWORD="a-long-password" npx github:rafaeldourado9/arcanum
 ```
 
 To start a Docker Compose project instead, with keys already generated:
 
 ```bash
-npm create arcanum            # creates ./arcanum with compose.yaml and a private .env
+npx github:rafaeldourado9/arcanum init            # creates ./arcanum with compose.yaml and a private .env
 cd arcanum && docker compose up -d
 ```
 

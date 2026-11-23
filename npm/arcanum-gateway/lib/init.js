@@ -6,7 +6,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const COMPOSE = `# Arcanum - created by "npm create arcanum"
+const COMPOSE = `# Arcanum - created by "npx github:rafaeldourado9/arcanum init"
 # Start:   docker compose up -d
 # Open:    http://localhost:3100 (dashboard password in .env)
 services:
@@ -76,7 +76,7 @@ function init(target = "arcanum", log = console.log) {
   log(`  cd ${rel}`);
   log("  docker compose up -d");
   log("  open http://localhost:3100   (password: GATEWAY_DASHBOARD_PASSWORD in .env)\n");
-  log("No Docker? Run it directly: npx arcanum-gateway");
+  log("No Docker? Run it directly: npx github:rafaeldourado9/arcanum");
   log("Guide: https://arcanum.rafaeldourado.tech/en/\n");
   return dir;
 }

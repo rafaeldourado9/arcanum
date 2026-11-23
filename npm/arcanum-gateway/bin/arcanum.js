@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 "use strict";
-// npx arcanum-gateway            -> baixa (uma vez) e roda o gateway com o painel
-// npx arcanum-gateway init [dir] -> cria um projeto docker compose com chaves geradas
-// npx arcanum-gateway version    -> versao do binario
+// npx github:rafaeldourado9/arcanum            -> baixa (uma vez) e roda o gateway com o painel
+// npx github:rafaeldourado9/arcanum init [dir] -> cria um projeto docker compose com chaves geradas
+// npx github:rafaeldourado9/arcanum version    -> versao do binario
 // Qualquer outro argumento vai direto para o binario. Configuracao: variaveis GATEWAY_*.
 
 const { spawn } = require("node:child_process");
@@ -17,13 +17,13 @@ function help() {
   console.log(`Arcanum ${pkg.version}: self-hosted WhatsApp gateway
 
 Usage:
-  npx arcanum-gateway                 run the gateway (dashboard on http://localhost:3100)
-  npx arcanum-gateway init [folder]   create a Docker Compose project with generated keys
-  npx arcanum-gateway version         print the gateway version
-  npx arcanum-gateway help            this help
+  npx github:rafaeldourado9/arcanum                 run the gateway (dashboard on http://localhost:3100)
+  npx github:rafaeldourado9/arcanum init [folder]   create a Docker Compose project with generated keys
+  npx github:rafaeldourado9/arcanum version         print the gateway version
+  npx github:rafaeldourado9/arcanum help            this help
 
 Configure with GATEWAY_* environment variables, for example:
-  GATEWAY_API_KEY=... GATEWAY_DASHBOARD_PASSWORD=... npx arcanum-gateway
+  GATEWAY_API_KEY=... GATEWAY_DASHBOARD_PASSWORD=... npx github:rafaeldourado9/arcanum
 
 Without GATEWAY_API_KEY a temporary key is printed on start. Sessions are stored in
 ~/.arcanum/data unless GATEWAY_DB_PATH is set.

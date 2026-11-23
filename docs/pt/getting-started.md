@@ -11,7 +11,7 @@ mensagem enviada.
     export ARCANUM_KEY="$(openssl rand -hex 32)"
     echo "Sua chave de API: $ARCANUM_KEY"
 
-    GATEWAY_API_KEY="$ARCANUM_KEY" npx arcanum-gateway
+    GATEWAY_API_KEY="$ARCANUM_KEY" npx github:rafaeldourado9/arcanum
     ```
 
     Precisa de Node.js 18+. Baixa o binário uma vez (com checksum conferido) e roda.

@@ -63,8 +63,8 @@
 
 | | Comando |
 |---|---|
-| **npx** (Node.js 18+) | `npx arcanum-gateway` |
-| **Projeto novo** (Compose + chaves geradas) | `npm create arcanum` |
+| **npx** (Node.js 18+) | `npx github:rafaeldourado9/arcanum` |
+| **Projeto novo** (Compose + chaves geradas) | `npx github:rafaeldourado9/arcanum init` |
 | **Docker** | `docker run -p 3100:3100 -v arcanum-data:/data ghcr.io/rafaeldourado9/arcanum` |
 | **Script Linux / macOS** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh` |
 | **Serviço do systemd** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh -s -- --systemd` |
@@ -98,8 +98,8 @@ curl -X POST localhost:3100/api/message/sendText/vendas \
 
 Abra **http://localhost:3100** para o painel, ou **/docs** para a API interativa.
 
-Tem Node.js? **`npx arcanum-gateway`** roda o gateway sem Docker e sem instalar nada, e
-**`npm create arcanum`** cria um projeto Compose com as chaves já geradas.
+Tem Node.js? **`npx github:rafaeldourado9/arcanum`** roda o gateway sem Docker e sem instalar nada, e
+**`npx github:rafaeldourado9/arcanum init`** cria um projeto Compose com as chaves já geradas.
 
 Sem Docker nem Node? `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh` (acrescente
 `-s -- --systemd` para instalar como serviço), ou baixe um binário para Linux, macOS ou Windows

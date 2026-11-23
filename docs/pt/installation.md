@@ -21,7 +21,7 @@ para a API interativa.
 O jeito mais rápido se você tem Node.js 18+. Sem Docker, sem dependências:
 
 ```bash
-npx arcanum-gateway
+npx github:rafaeldourado9/arcanum
 ```
 
 Na primeira vez ele baixa o binário do seu sistema da release do GitHub, **confere o SHA-256**
@@ -29,13 +29,13 @@ contra o `checksums.txt` e guarda em `~/.arcanum/`. O painel abre em `http://loc
 as sessões ficam em `~/.arcanum/data`. Defina suas chaves como em qualquer instalação:
 
 ```bash
-GATEWAY_API_KEY="$(openssl rand -hex 32)" GATEWAY_DASHBOARD_PASSWORD="uma-senha-longa" npx arcanum-gateway
+GATEWAY_API_KEY="$(openssl rand -hex 32)" GATEWAY_DASHBOARD_PASSWORD="uma-senha-longa" npx github:rafaeldourado9/arcanum
 ```
 
 Para começar um projeto com Docker Compose, com as chaves já geradas:
 
 ```bash
-npm create arcanum            # cria ./arcanum com compose.yaml e um .env privado
+npx github:rafaeldourado9/arcanum init            # cria ./arcanum com compose.yaml e um .env privado
 cd arcanum && docker compose up -d
 ```
 
