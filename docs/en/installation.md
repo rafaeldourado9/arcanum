@@ -42,6 +42,11 @@ cd arcanum && docker compose up -d
 
 `ARCANUM_VERSION=v1.1.0` pins a release; `ARCANUM_HOME` changes where binaries and data go.
 
+!!! warning "Windows PowerShell"
+    If you see *"running scripts is disabled on this system"*, use **`npx.cmd`** instead of
+    `npx` (`npx.cmd github:rafaeldourado9/arcanum`), run it from Command Prompt (cmd), or allow
+    scripts for your user once: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+
 ## Docker
 
 ```bash

@@ -69,6 +69,8 @@
 | **systemd service** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh -s -- --systemd` |
 | **Binary** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
 
+On Windows PowerShell, use `npx.cmd` instead of `npx` (or run it from cmd).
+
 Then open **http://localhost:3100**. Details: [Installation](https://arcanum.rafaeldourado.tech/en/installation/).
 
 ## Quick start
