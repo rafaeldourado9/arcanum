@@ -4,7 +4,7 @@
   "description": "Open-source, self-hosted WhatsApp gateway. Run it with: npx github:rafaeldourado9/arcanum",
   "private": true,
   "license": "MIT",
-  "homepage": "https://arcanum.rafaeldourado.tech",
+  "homepage": "https://arcanumgateway.com.br",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rafaeldourado9/arcanum.git"

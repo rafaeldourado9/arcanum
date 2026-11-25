@@ -22,7 +22,7 @@ Whatever you choose, open **`http://<server>:3100`** for the [dashboard](dashboa
 Open **PowerShell** and paste:
 
 ```powershell
-irm https://arcanum.rafaeldourado.tech/install.ps1 | iex
+irm https://arcanumgateway.com.br/install.ps1 | iex
 ```
 
 It works **even when running scripts is disabled** (the Windows default) and needs no
@@ -123,7 +123,7 @@ Ready-made Compose files live in the repository's
 ## Install script (Linux, macOS)
 
 ```bash
-curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh
+curl -fsSL https://arcanumgateway.com.br/install.sh | sh
 ```
 
 The script detects your OS and CPU, downloads the latest release, **checks its SHA-256**
@@ -135,14 +135,14 @@ GATEWAY_API_KEY="$(openssl rand -hex 32)" GATEWAY_DB_PATH="$HOME/.arcanum" arcan
 
 Options: `--version v1.1.0` pins a version; `ARCANUM_BIN_DIR=$HOME/.local/bin` installs
 without sudo. Prefer to read it first? It is
-[short](https://arcanum.rafaeldourado.tech/install.sh).
+[short](https://arcanumgateway.com.br/install.sh).
 
 ## systemd service
 
 On a Linux server, let the script set everything up:
 
 ```bash
-curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh -s -- --systemd
+curl -fsSL https://arcanumgateway.com.br/install.sh | sh -s -- --systemd
 ```
 
 It creates:

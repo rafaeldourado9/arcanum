@@ -1,6 +1,6 @@
 # arcanum-gateway
 
-Run [Arcanum](https://arcanum.rafaeldourado.tech/en/), the open-source, self-hosted WhatsApp
+Run [Arcanum](https://arcanumgateway.com.br/en/), the open-source, self-hosted WhatsApp
 gateway, with one command. No Docker needed.
 
 ```bash
@@ -37,4 +37,4 @@ are stored in `~/.arcanum/data` unless `GATEWAY_DB_PATH` is set.
 | `ARCANUM_VERSION` | Run a specific release, e.g. `v1.1.0`. |
 | `ARCANUM_HOME` | Where binaries and data go (default `~/.arcanum`). |
 
-Guide, API and tutorials: https://arcanum.rafaeldourado.tech/en/ · MIT
+Guide, API and tutorials: https://arcanumgateway.com.br/en/ · MIT

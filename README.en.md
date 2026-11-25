@@ -18,9 +18,9 @@
 
 <p align="center">
   <a href="README.md"><b>Português (BR)</b></a> ·
-  <a href="https://arcanum.rafaeldourado.tech/en/"><b>Documentation</b></a> ·
-  <a href="https://arcanum.rafaeldourado.tech/en/getting-started/">Getting started</a> ·
-  <a href="https://arcanum.rafaeldourado.tech/en/webhooks/">Webhooks</a> ·
+  <a href="https://arcanumgateway.com.br/en/"><b>Documentation</b></a> ·
+  <a href="https://arcanumgateway.com.br/en/getting-started/">Getting started</a> ·
+  <a href="https://arcanumgateway.com.br/en/webhooks/">Webhooks</a> ·
   <a href="SECURITY.md">Security</a>
 </p>
 
@@ -62,18 +62,18 @@
 
 | | Command |
 |---|---|
-| **Windows** (PowerShell) | `irm https://arcanum.rafaeldourado.tech/install.ps1 \| iex` |
+| **Windows** (PowerShell) | `irm https://arcanumgateway.com.br/install.ps1 \| iex` |
 | **npx** (Node.js 18+) | `npx github:rafaeldourado9/arcanum` |
 | **New project** (Compose + generated keys) | `npx github:rafaeldourado9/arcanum init` |
 | **Docker** | `docker run -p 3100:3100 -v arcanum-data:/data ghcr.io/rafaeldourado9/arcanum` |
-| **Linux / macOS script** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh` |
-| **systemd service** | `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh \| sh -s -- --systemd` |
+| **Linux / macOS script** | `curl -fsSL https://arcanumgateway.com.br/install.sh \| sh` |
+| **systemd service** | `curl -fsSL https://arcanumgateway.com.br/install.sh \| sh -s -- --systemd` |
 | **Binary** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
 
 On Windows, the PowerShell installer works even when scripts are disabled. To use npx from
 PowerShell, type `npx.cmd` instead of `npx`.
 
-Then open **http://localhost:3100**. Details: [Installation](https://arcanum.rafaeldourado.tech/en/installation/).
+Then open **http://localhost:3100**. Details: [Installation](https://arcanumgateway.com.br/en/installation/).
 
 ## Quick start
 
@@ -104,19 +104,19 @@ Open **http://localhost:3100** for the dashboard, or **/docs** for the interacti
 Have Node.js? **`npx github:rafaeldourado9/arcanum`** runs it with no Docker and no install, and
 **`npx github:rafaeldourado9/arcanum init`** scaffolds a Compose project with generated keys.
 
-No Docker or Node? `curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh` (add
+No Docker or Node? `curl -fsSL https://arcanumgateway.com.br/install.sh | sh` (add
 `-s -- --systemd` to install it as a service), or grab a binary for Linux, macOS or Windows
 from [Releases](https://github.com/rafaeldourado9/arcanum/releases). All options:
-[Installation](https://arcanum.rafaeldourado.tech/en/installation/).
+[Installation](https://arcanumgateway.com.br/en/installation/).
 
-**Learn by doing:** four short [tutorials](https://arcanum.rafaeldourado.tech/en/tutorials/)
-([em português](https://arcanum.rafaeldourado.tech/tutorials/)) build a real bot from the
+**Learn by doing:** four short [tutorials](https://arcanumgateway.com.br/en/tutorials/)
+([em português](https://arcanumgateway.com.br/tutorials/)) build a real bot from the
 ready-made project in [`examples/faq-bot`](examples/faq-bot): automatic answers, human
 takeover, notifications from your system and moving servers.
 
 The full guide (sessions, every message type, webhook payloads with signature
 verification in Python, Node.js, Go and PHP, production setup with HTTPS, monitoring and
-troubleshooting) is at **[arcanum.rafaeldourado.tech](https://arcanum.rafaeldourado.tech/en/)**,
+troubleshooting) is at **[arcanumgateway.com.br](https://arcanumgateway.com.br/en/)**,
 in English and Portuguese. The same pages live in [`docs/`](docs/) in this repository.
 
 ## Features
@@ -147,7 +147,7 @@ Everything is set through environment variables. The essentials:
 | `GATEWAY_DASHBOARD_PASSWORD` | | Dashboard password (without it, sign in with the API key). |
 
 See [`.env.example`](.env.example) and the
-[configuration reference](https://arcanum.rafaeldourado.tech/en/configuration/).
+[configuration reference](https://arcanumgateway.com.br/en/configuration/).
 
 ## Development
 

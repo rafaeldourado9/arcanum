@@ -8,8 +8,8 @@ A complete WhatsApp bot on top of Arcanum, small enough to read in five minutes:
   (`from_me`);
 - answers the webhook immediately and replies in the background, through the Arcanum API.
 
-Step-by-step walkthrough: [Tutorial: your first bot](https://arcanum.rafaeldourado.tech/en/tutorials/first-bot/)
-([em português](https://arcanum.rafaeldourado.tech/tutorials/first-bot/)).
+Step-by-step walkthrough: [Tutorial: your first bot](https://arcanumgateway.com.br/en/tutorials/first-bot/)
+([em português](https://arcanumgateway.com.br/tutorials/first-bot/)).
 
 ## Run
 
@@ -44,4 +44,4 @@ pytest
 - Keep `paused_until` in Redis or your database instead of memory.
 - Replace `answer_for` with a call to your favourite AI model, keeping the same structure.
 - Put Arcanum behind HTTPS before exposing it: see
-  [Deployment](https://arcanum.rafaeldourado.tech/en/deployment/).
+  [Deployment](https://arcanumgateway.com.br/en/deployment/).

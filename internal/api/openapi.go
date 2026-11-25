@@ -7,7 +7,7 @@ func openAPISpec() map[string]any {
 		"openapi": "3.1.0",
 		"info": map[string]any{
 			"title":       "Arcanum API",
-			"description": "Open-source, self-hosted WhatsApp gateway written in Go: multi-session, built-in anti-ban, signed webhooks.\n\nEvery route except `/health` and `/docs` requires the API key (`X-Api-Key` header or `Authorization: Bearer`). Full guide: https://arcanum.rafaeldourado.tech/en/",
+			"description": "Open-source, self-hosted WhatsApp gateway written in Go: multi-session, built-in anti-ban, signed webhooks.\n\nEvery route except `/health` and `/docs` requires the API key (`X-Api-Key` header or `Authorization: Bearer`). Full guide: https://arcanumgateway.com.br/en/",
 			"version":     Version,
 			"contact": map[string]string{
 				"name": "Arcanum",

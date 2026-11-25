@@ -90,7 +90,7 @@ Foco: segurança e confiabilidade. **Mudança incompatível:** toda rota agora e
 - `GET /metrics` (Prometheus) e `/health` com versão e sessões por status.
 - Logs estruturados (`GATEWAY_LOG_FORMAT=json`, `GATEWAY_LOG_LEVEL`) e desligamento limpo.
 - Documentação completa em inglês e português (MkDocs) em
-  https://arcanum.rafaeldourado.tech, `.env.example` e imagem publicada no GHCR por tag,
+  https://arcanumgateway.com.br, `.env.example` e imagem publicada no GHCR por tag,
   multi-arquitetura, com SBOM, proveniência e assinatura Cosign.
 
 ## [1.0.0] - 2026-06-20

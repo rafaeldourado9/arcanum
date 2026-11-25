@@ -1,6 +1,6 @@
 site_name: Arcanum
 site_description: Open-source, self-hosted WhatsApp gateway in Go. Multi-session, built-in anti-ban, signed webhooks.
-site_url: https://arcanum.rafaeldourado.tech/
+site_url: https://arcanumgateway.com.br/
 site_author: Rafael Dourado
 repo_url: https://github.com/rafaeldourado9/arcanum
 repo_name: rafaeldourado9/arcanum

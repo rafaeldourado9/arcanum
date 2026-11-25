@@ -22,7 +22,7 @@ para a API interativa.
 Abra o **PowerShell** e cole:
 
 ```powershell
-irm https://arcanum.rafaeldourado.tech/install.ps1 | iex
+irm https://arcanumgateway.com.br/install.ps1 | iex
 ```
 
 Funciona **mesmo com a execução de scripts desabilitada** (o padrão do Windows) e não precisa de
@@ -121,7 +121,7 @@ Arquivos de Compose prontos ficam na pasta
 ## Script de instalação (Linux, macOS)
 
 ```bash
-curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh
+curl -fsSL https://arcanumgateway.com.br/install.sh | sh
 ```
 
 O script descobre o sistema e o processador, baixa a versão mais recente, **confere o
@@ -133,14 +133,14 @@ GATEWAY_API_KEY="$(openssl rand -hex 32)" GATEWAY_DB_PATH="$HOME/.arcanum" arcan
 
 Opções: `--version v1.1.0` fixa uma versão; `ARCANUM_BIN_DIR=$HOME/.local/bin` instala sem
 sudo. Prefere ler antes? Ele é
-[curto](https://arcanum.rafaeldourado.tech/install.sh).
+[curto](https://arcanumgateway.com.br/install.sh).
 
 ## Serviço do systemd
 
 Num servidor Linux, deixe o script montar tudo:
 
 ```bash
-curl -fsSL https://arcanum.rafaeldourado.tech/install.sh | sh -s -- --systemd
+curl -fsSL https://arcanumgateway.com.br/install.sh | sh -s -- --systemd
 ```
 
 Ele cria:

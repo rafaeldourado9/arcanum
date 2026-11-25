@@ -28,7 +28,7 @@ Configure with GATEWAY_* environment variables, for example:
 Without GATEWAY_API_KEY a temporary key is printed on start. Sessions are stored in
 ~/.arcanum/data unless GATEWAY_DB_PATH is set.
 
-Guide: https://arcanum.rafaeldourado.tech/en/`);
+Guide: https://arcanumgateway.com.br/en/`);
 }
 
 async function main() {

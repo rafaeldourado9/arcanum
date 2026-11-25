@@ -3,7 +3,7 @@
   "version": "0.0.0-dev",
   "description": "Open-source, self-hosted WhatsApp gateway: REST API, signed webhooks, anti-ban and a web dashboard. Runs the Arcanum binary with npx.",
   "keywords": ["whatsapp", "whatsapp-api", "whatsapp-gateway", "gateway", "webhook", "self-hosted", "chatbot"],
-  "homepage": "https://arcanum.rafaeldourado.tech",
+  "homepage": "https://arcanumgateway.com.br",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rafaeldourado9/arcanum.git",

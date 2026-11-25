@@ -1,6 +1,6 @@
 [Unit]
 Description=Arcanum WhatsApp gateway
-Documentation=https://arcanum.rafaeldourado.tech
+Documentation=https://arcanumgateway.com.br
 After=network-online.target
 Wants=network-online.target
 

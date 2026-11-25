@@ -1,6 +1,6 @@
 # Arcanum installer for Windows (PowerShell 5.1+).
 #
-#   irm https://arcanum.rafaeldourado.tech/install.ps1 | iex
+#   irm https://arcanumgateway.com.br/install.ps1 | iex
 #
 # Works even when running scripts is disabled (the installer runs in memory).
 # What it does:
@@ -76,4 +76,4 @@ Write-Host '  $env:GATEWAY_DASHBOARD_PASSWORD = "choose-a-long-password"'
 Write-Host '  $env:GATEWAY_DB_PATH = "$env:LOCALAPPDATA\Arcanum"'
 Write-Host "  arcanum"
 Write-Host ""
-Write-Host "Open a new terminal if 'arcanum' is not found. Guide: https://arcanum.rafaeldourado.tech"
+Write-Host "Open a new terminal if 'arcanum' is not found. Guide: https://arcanumgateway.com.br"
