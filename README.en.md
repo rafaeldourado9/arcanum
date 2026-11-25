@@ -63,6 +63,7 @@
 
 | | Command |
 |---|---|
+| **AI agent** (Claude Code, Cursor, Copilot...) | Paste the prompt from [Install with an agent](#install-with-an-ai-agent) |
 | **Windows** (PowerShell) | `irm https://arcanumgateway.com.br/install.ps1 \| iex` |
 | **npx** (Node.js 18+ and Git) | `npx github:rafaeldourado9/arcanum` |
 | **New project** (Compose + generated keys) | `npx github:rafaeldourado9/arcanum init` |
@@ -80,6 +81,18 @@ Every installer downloads the published release and checks its SHA-256 before in
 Tested on Ubuntu 24.04, Alpine, Node.js 22 and Windows 11.
 
 Then open **http://localhost:3100**. Details: [Installation](https://arcanumgateway.com.br/en/installation/).
+
+## Install with an AI agent
+
+Copy and paste into your favorite agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI):
+
+```text
+Install Arcanum, the open-source WhatsApp gateway, on this machine following the official instructions at https://arcanumgateway.com.br/agent.txt. Ask me before installing it as a system service, opening ports or exposing anything to the internet. When done, tell me how to start and stop it, where the keys are and how to connect my first number.
+```
+
+The agent follows the official instructions in [agent.txt](https://arcanumgateway.com.br/agent.txt):
+official sources only, SHA-256 checked, port 3100 kept off the internet, and it asks before
+changing the system.
 
 ## Quick start
 

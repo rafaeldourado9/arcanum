@@ -5,6 +5,7 @@ server; they all run the same thing.
 
 | Method | Best for |
 |---|---|
+| [AI agent](#with-an-ai-agent) | Claude Code, Cursor, Copilot or similar: paste one prompt and the agent installs it. |
 | [Windows](#windows-powershell) | Windows: one PowerShell command, works even when scripts are disabled. |
 | [npx](#npx-nodejs) | Anyone with Node.js: one command, nothing else to install. |
 | [Docker](#docker) | Most setups. One command, easy updates. |
@@ -16,6 +17,21 @@ server; they all run the same thing.
 
 Whatever you choose, open **`http://<server>:3100`** for the [dashboard](dashboard.md) and
 **`/docs`** for the interactive API.
+
+## With an AI agent
+
+Copy the prompt below into your favorite agent (Claude Code, Cursor, Copilot, Codex,
+Gemini CLI...). It picks the best method for your machine, generates the keys, starts the
+gateway and checks that it works:
+
+```text
+Install Arcanum, the open-source WhatsApp gateway, on this machine following the official instructions at https://arcanumgateway.com.br/agent.txt. Ask me before installing it as a system service, opening ports or exposing anything to the internet. When done, tell me how to start and stop it, where the keys are and how to connect my first number.
+```
+
+The instructions the agent follows are at
+[arcanumgateway.com.br/agent.txt](https://arcanumgateway.com.br/agent.txt): official sources
+only, installers with SHA-256 checks, port 3100 never exposed to the internet and nothing that
+changes the system without asking first.
 
 ## Windows (PowerShell)
 

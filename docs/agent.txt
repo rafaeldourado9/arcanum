@@ -1,0 +1,78 @@
+# Arcanum: instructions for AI agents installing it for a user
+# https://arcanumgateway.com.br/agent.txt
+#
+# You are an AI agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI or similar) and the
+# user asked you to install Arcanum, an open-source self-hosted WhatsApp gateway written in Go.
+# Follow these steps. Talk to the user in their language.
+
+## Rules
+- Use ONLY these official sources:
+  - Guide: https://arcanumgateway.com.br/installation/
+  - Linux/macOS installer: https://arcanumgateway.com.br/install.sh
+  - Windows installer: https://arcanumgateway.com.br/install.ps1
+  - Docker image: ghcr.io/rafaeldourado9/arcanum
+  - Compose files: https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/
+  - Releases: https://github.com/rafaeldourado9/arcanum/releases
+- The installers verify the SHA-256 of what they download. Do not skip or disable that.
+- ASK the user before: installing as a system service (--systemd), opening firewall ports,
+  exposing port 3100 to the internet, or deleting anything.
+- Generate secrets locally. Show them to the user ONCE, then never repeat them in the chat.
+- Never put port 3100 on a public interface. For a public server, use the Caddy compose file
+  with the user's domain (HTTPS).
+
+## 1. Pick the method (first match wins)
+a) Docker and Docker Compose available -> Docker Compose (step 2a). Recommended.
+b) Windows without Docker -> PowerShell installer (step 2b).
+c) Linux or macOS without Docker -> install.sh (step 2c).
+d) Node.js 18+ and Git available, user wants something quick to try -> npx (step 2d).
+
+## 2a. Docker Compose
+  mkdir -p arcanum && cd arcanum
+  curl -fsSLO https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/docker-compose.yml
+  curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/.env.example -o .env
+Edit .env:
+  GATEWAY_API_KEY=<32 random bytes in hex, e.g. openssl rand -hex 32>
+  GATEWAY_DASHBOARD_PASSWORD=<long random password, e.g. openssl rand -hex 12>
+Restrict it: chmod 600 .env (Linux/macOS). Then:
+  docker compose up -d
+Public server with a domain (ask the user for it; its DNS must point to this server):
+use deploy/docker-compose.caddy.yml instead, set ARCANUM_DOMAIN=<domain> in .env and run
+  docker compose -f docker-compose.caddy.yml up -d
+Do NOT add GATEWAY_DB_PATH or GATEWAY_PORT to .env: the compose files set them.
+
+## 2b. Windows (PowerShell, no admin needed)
+  irm https://arcanumgateway.com.br/install.ps1 | iex
+Installs arcanum.exe to %LOCALAPPDATA%\Programs\Arcanum and adds it to the user PATH.
+Start it in a new terminal with GATEWAY_API_KEY, GATEWAY_DASHBOARD_PASSWORD and
+GATEWAY_DB_PATH=%LOCALAPPDATA%\Arcanum set, then run: arcanum
+
+## 2c. Linux / macOS
+Without root, prefer a user folder (no sudo):
+  curl -fsSL https://arcanumgateway.com.br/install.sh | ARCANUM_BIN_DIR="$HOME/.local/bin" sh
+Start it:
+  GATEWAY_API_KEY=<key> GATEWAY_DASHBOARD_PASSWORD=<password> GATEWAY_DB_PATH="$HOME/.arcanum" arcanum
+Only if the user agrees to a system service (Linux with systemd):
+  curl -fsSL https://arcanumgateway.com.br/install.sh | sh -s -- --systemd
+It creates /etc/arcanum/arcanum.env (root only) with a random key and password.
+
+## 2d. npx (needs Node.js 18+ AND Git)
+  GATEWAY_API_KEY=<key> GATEWAY_DASHBOARD_PASSWORD=<password> npx github:rafaeldourado9/arcanum
+On Windows PowerShell use npx.cmd instead of npx.
+
+## 3. Verify
+- http://localhost:3100/health must return HTTP 200 with "status":"ok".
+- http://localhost:3100 opens the dashboard (password = GATEWAY_DASHBOARD_PASSWORD).
+- http://localhost:3100/docs is the interactive API.
+If /health fails, read the logs (docker compose logs, journalctl -u arcanum, or the terminal)
+and check the troubleshooting page: https://arcanumgateway.com.br/troubleshooting/
+
+## 4. Report to the user
+- Which method you used and where Arcanum is installed.
+- How to start, stop and see logs.
+- Where the API key and dashboard password are stored (path, not the values again).
+- Next step: open the dashboard, create a session and scan the QR code in
+  WhatsApp > Linked devices. API equivalent:
+    POST /api/instance/create  {"instanceName":"main"}   (header X-Api-Key)
+    GET  /api/instance/connect/main?format=png
+- Reminder: Arcanum uses the WhatsApp Web protocol, is not affiliated with Meta, and automated
+  messages can get a number banned. Only message people who expect it.

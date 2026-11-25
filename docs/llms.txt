@@ -1,0 +1,17 @@
+# Arcanum
+
+> Open-source, self-hosted WhatsApp gateway written in Go: one binary with a REST API, signed webhooks, built-in anti-ban and a web dashboard. MIT license.
+
+Installing it for a user? Follow https://arcanumgateway.com.br/agent.txt exactly.
+
+## Docs
+- [Installation](https://arcanumgateway.com.br/en/installation/): every install method
+- [Getting started](https://arcanumgateway.com.br/en/getting-started/)
+- [Configuration](https://arcanumgateway.com.br/en/configuration/): all GATEWAY_* variables
+- [API reference](https://arcanumgateway.com.br/en/api-reference/)
+- [Webhooks](https://arcanumgateway.com.br/en/webhooks/)
+- [Troubleshooting](https://arcanumgateway.com.br/en/troubleshooting/)
+
+## Source
+- [GitHub](https://github.com/rafaeldourado9/arcanum)
+- [Releases](https://github.com/rafaeldourado9/arcanum/releases)
