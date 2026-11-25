@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{#
+  Prévia do link no WhatsApp, Telegram, LinkedIn e X: card preto em
+  docs/assets/og.png (1200x630) e título/descrição de cada página.
+#}
+{% block extrahead %}
+  {% set og_titulo = page.title ~ " · " ~ config.site_name if page.title and not page.is_homepage else config.site_name ~ ": API de WhatsApp que você mesmo hospeda" %}
+  {% set og_descricao = page.meta.description if page.meta and page.meta.description else config.site_description %}
+  {% set og_imagem = config.site_url ~ "assets/og.png" %}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ config.site_name }}">
+  <meta property="og:title" content="{{ og_titulo }}">
+  <meta property="og:description" content="{{ og_descricao }}">
+  <meta property="og:url" content="{{ page.canonical_url }}">
+  <meta property="og:image" content="{{ og_imagem }}">
+  <meta property="og:image:secure_url" content="{{ og_imagem }}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Arcanum: API de WhatsApp que você mesmo hospeda">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ og_titulo }}">
+  <meta name="twitter:description" content="{{ og_descricao }}">
+  <meta name="twitter:image" content="{{ og_imagem }}">
+{% endblock %}

@@ -9,6 +9,7 @@ copyright: MIT License · Arcanum is not affiliated with WhatsApp or Meta.
 
 theme:
   name: material
+  custom_dir: overrides
   language: pt
   logo: assets/logo.svg
   favicon: assets/logo.svg
