@@ -41,7 +41,8 @@ Opções antes de rodar: `$env:ARCANUM_VERSION = "v1.1.0"` fixa a versão,
 
 ## npx (Node.js)
 
-O jeito mais rápido se você tem Node.js 18+. Sem Docker, sem dependências:
+O jeito mais rápido se você tem Node.js 18+ e **Git** instalados (o `npx` usa o Git para
+baixar direto do GitHub; sem ele aparece `npm error enoent ... git`). Sem Docker:
 
 ```bash
 npx github:rafaeldourado9/arcanum
@@ -131,9 +132,17 @@ SHA-256** contra o `checksums.txt` e instala `/usr/local/bin/arcanum`. Depois:
 GATEWAY_API_KEY="$(openssl rand -hex 32)" GATEWAY_DB_PATH="$HOME/.arcanum" arcanum
 ```
 
-Opções: `--version v1.1.0` fixa uma versão; `ARCANUM_BIN_DIR=$HOME/.local/bin` instala sem
-sudo. Prefere ler antes? Ele é
+Sem root, o script usa `sudo` para gravar em `/usr/local/bin`. Para instalar **sem sudo**, na
+sua pasta (ela é criada se não existir), passe a variável do lado do `sh`:
+
+```bash
+curl -fsSL https://arcanumgateway.com.br/install.sh | ARCANUM_BIN_DIR="$HOME/.local/bin" sh
+```
+
+Para fixar uma versão: `... | sh -s -- --version v1.1.0`. Prefere ler antes? Ele é
 [curto](https://arcanumgateway.com.br/install.sh).
+
+Testado em Ubuntu 24.04 e Alpine (root e usuário comum) e no Windows 11 (PowerShell 5.1).
 
 ## Serviço do systemd
 

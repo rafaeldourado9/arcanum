@@ -77,6 +77,9 @@ say "Checksum OK."
 tar -xzf "$tmp/$file" -C "$tmp"
 
 SUDO=""
+# Install folder that does not exist yet (e.g. ARCANUM_BIN_DIR=$HOME/.local/bin on a fresh
+# machine): create it when we can; otherwise the check below picks sudo or fails.
+[ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR" 2>/dev/null || true
 if [ "$(id -u)" -ne 0 ]; then
   if [ -w "$BIN_DIR" ]; then SUDO=""; elif command -v sudo >/dev/null 2>&1; then SUDO="sudo"; else fail "run as root or set ARCANUM_BIN_DIR to a writable folder"; fi
 fi

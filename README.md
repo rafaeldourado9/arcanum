@@ -64,7 +64,7 @@
 | | Comando |
 |---|---|
 | **Windows** (PowerShell) | `irm https://arcanumgateway.com.br/install.ps1 \| iex` |
-| **npx** (Node.js 18+) | `npx github:rafaeldourado9/arcanum` |
+| **npx** (Node.js 18+ e Git) | `npx github:rafaeldourado9/arcanum` |
 | **Projeto novo** (Compose + chaves geradas) | `npx github:rafaeldourado9/arcanum init` |
 | **Docker** | `docker run -p 3100:3100 -v arcanum-data:/data ghcr.io/rafaeldourado9/arcanum` |
 | **Script Linux / macOS** | `curl -fsSL https://arcanumgateway.com.br/install.sh \| sh` |

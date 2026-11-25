@@ -42,7 +42,8 @@ changes the folder and `$env:ARCANUM_NO_PATH = "1"` leaves the PATH alone.
 
 ## npx (Node.js)
 
-The quickest way if you have Node.js 18+. No Docker, no dependencies:
+The quickest way if you have Node.js 18+ and **Git** installed (`npx` uses Git to fetch
+straight from GitHub; without it you get `npm error enoent ... git`). No Docker:
 
 ```bash
 npx github:rafaeldourado9/arcanum
@@ -133,9 +134,17 @@ against `checksums.txt` and installs `/usr/local/bin/arcanum`. Then:
 GATEWAY_API_KEY="$(openssl rand -hex 32)" GATEWAY_DB_PATH="$HOME/.arcanum" arcanum
 ```
 
-Options: `--version v1.1.0` pins a version; `ARCANUM_BIN_DIR=$HOME/.local/bin` installs
-without sudo. Prefer to read it first? It is
+Without root the script uses `sudo` to write to `/usr/local/bin`. To install **without sudo**
+into your own folder (created if missing), pass the variable on the `sh` side:
+
+```bash
+curl -fsSL https://arcanumgateway.com.br/install.sh | ARCANUM_BIN_DIR="$HOME/.local/bin" sh
+```
+
+To pin a version: `... | sh -s -- --version v1.1.0`. Prefer to read it first? It is
 [short](https://arcanumgateway.com.br/install.sh).
+
+Tested on Ubuntu 24.04 and Alpine (root and regular user) and on Windows 11 (PowerShell 5.1).
 
 ## systemd service
 
