@@ -8,7 +8,7 @@
 #   2. Checks its SHA-256 against the published checksums.txt.
 #   3. Installs it to %LOCALAPPDATA%\Programs\Arcanum and adds that folder to your user PATH.
 # Nothing needs administrator rights. Options (set before running):
-#   $env:ARCANUM_VERSION = "v1.1.0"        pin a release
+#   $env:ARCANUM_VERSION = "v1.1.1"        pin a release
 #   $env:ARCANUM_INSTALL_DIR = "C:\tools"   install somewhere else
 #   $env:ARCANUM_NO_PATH = "1"              do not touch the user PATH
 

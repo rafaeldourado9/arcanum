@@ -37,7 +37,7 @@ arcanum
 ```
 
 If `arcanum` is not found, open a new terminal (PATH changes apply to new windows). Options
-before running: `$env:ARCANUM_VERSION = "v1.1.0"` pins a release, `$env:ARCANUM_INSTALL_DIR`
+before running: `$env:ARCANUM_VERSION = "v1.1.1"` pins a release, `$env:ARCANUM_INSTALL_DIR`
 changes the folder and `$env:ARCANUM_NO_PATH = "1"` leaves the PATH alone.
 
 ## npx (Node.js)
@@ -65,7 +65,7 @@ npx github:rafaeldourado9/arcanum init            # creates ./arcanum with compo
 cd arcanum && docker compose up -d
 ```
 
-`ARCANUM_VERSION=v1.1.0` pins a release; `ARCANUM_HOME` changes where binaries and data go.
+`ARCANUM_VERSION=v1.1.1` pins a release; `ARCANUM_HOME` changes where binaries and data go.
 
 !!! warning "npx on Windows PowerShell"
     In PowerShell, `npx` is a `.ps1` script and Windows blocks scripts by default (*"running
@@ -141,7 +141,7 @@ into your own folder (created if missing), pass the variable on the `sh` side:
 curl -fsSL https://arcanumgateway.com.br/install.sh | ARCANUM_BIN_DIR="$HOME/.local/bin" sh
 ```
 
-To pin a version: `... | sh -s -- --version v1.1.0`. Prefer to read it first? It is
+To pin a version: `... | sh -s -- --version v1.1.1`. Prefer to read it first? It is
 [short](https://arcanumgateway.com.br/install.sh).
 
 Tested on Ubuntu 24.04 and Alpine (root and regular user) and on Windows 11 (PowerShell 5.1).

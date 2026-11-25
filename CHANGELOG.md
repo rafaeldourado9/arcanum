@@ -5,7 +5,29 @@ Todas as mudanças notaveis do projeto serao documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere ao [Versionamento Semantico](https://semver.org/lang/pt-BR/).
 
-## [1.1.0] - não lançada
+## [1.1.1] - 2026-11-25
+
+Correções de instalação, achadas testando todas as formas de instalar do zero.
+
+### Corrigido
+
+- **Docker Compose reiniciava sem parar** com o `.env` copiado do exemplo: o `.env.example`
+  trazia `GATEWAY_DB_PATH=./data`, que sobrescrevia o `/data` da imagem e falhava no sistema
+  de arquivos somente leitura. Os dois compose agora fixam `/data` (vale até com `.env` antigo).
+- `install.sh` com `ARCANUM_BIN_DIR` numa pasta que ainda não existe dava um erro enganoso
+  ("run as root"); agora cria a pasta.
+- `.env.example` vinha com o webhook preenchido (`your-app.example.com`) e o gateway tentava
+  entregar lá; agora vem comentado.
+
+### Adicionado
+
+- `deploy/.env.example` próprio para Docker Compose, só com o que vale em container, e
+  `GATEWAY_DASHBOARD_PASSWORD` nos dois exemplos.
+- Documentação e site no domínio próprio **arcanumgateway.com.br**; instaladores em
+  `https://arcanumgateway.com.br/install.sh` e `/install.ps1`.
+- Docs: o `npx` precisa de Git; comando para instalar sem sudo; plataformas testadas.
+
+## [1.1.0] - 2026-11-23
 
 Foco: segurança e confiabilidade. **Mudança incompatível:** toda rota agora exige chave de API.
 

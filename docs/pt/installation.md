@@ -36,7 +36,7 @@ arcanum
 ```
 
 Se `arcanum` não for encontrado, abra um terminal novo (o PATH só atualiza em janelas novas).
-Opções antes de rodar: `$env:ARCANUM_VERSION = "v1.1.0"` fixa a versão,
+Opções antes de rodar: `$env:ARCANUM_VERSION = "v1.1.1"` fixa a versão,
 `$env:ARCANUM_INSTALL_DIR` muda a pasta e `$env:ARCANUM_NO_PATH = "1"` não mexe no PATH.
 
 ## npx (Node.js)
@@ -63,7 +63,7 @@ npx github:rafaeldourado9/arcanum init            # cria ./arcanum com compose.y
 cd arcanum && docker compose up -d
 ```
 
-`ARCANUM_VERSION=v1.1.0` fixa uma versão; `ARCANUM_HOME` muda onde ficam binários e dados.
+`ARCANUM_VERSION=v1.1.1` fixa uma versão; `ARCANUM_HOME` muda onde ficam binários e dados.
 
 !!! warning "npx no Windows PowerShell"
     No PowerShell, o `npx` é um script `.ps1`, e o Windows bloqueia scripts por padrão (*"a execução
@@ -139,7 +139,7 @@ sua pasta (ela é criada se não existir), passe a variável do lado do `sh`:
 curl -fsSL https://arcanumgateway.com.br/install.sh | ARCANUM_BIN_DIR="$HOME/.local/bin" sh
 ```
 
-Para fixar uma versão: `... | sh -s -- --version v1.1.0`. Prefere ler antes? Ele é
+Para fixar uma versão: `... | sh -s -- --version v1.1.1`. Prefere ler antes? Ele é
 [curto](https://arcanumgateway.com.br/install.sh).
 
 Testado em Ubuntu 24.04 e Alpine (root e usuário comum) e no Windows 11 (PowerShell 5.1).

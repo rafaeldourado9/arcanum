@@ -107,3 +107,51 @@
   border-color: rgba(127, 127, 127, 0.45);
   box-shadow: none;
 }
+
+/* Botões legíveis nos dois temas. O secundário do Material usa --md-primary-fg-color, que no
+   escuro é a cor do fundo (#141414): o botão do GitHub sumia e só sobrava o sublinhado. */
+.md-typeset .md-button {
+  text-decoration: none;
+  color: var(--md-default-fg-color);
+  border: 1px solid var(--md-default-fg-color--lighter);
+  background: transparent;
+}
+.md-typeset .md-button:hover,
+.md-typeset .md-button:focus {
+  color: var(--md-default-fg-color);
+  border-color: var(--md-default-fg-color);
+  background: rgba(127, 127, 127, 0.12);
+}
+.md-typeset .md-button--primary {
+  background: var(--md-default-fg-color);
+  border-color: var(--md-default-fg-color);
+  color: var(--md-default-bg-color);
+}
+.md-typeset .md-button--primary:hover,
+.md-typeset .md-button--primary:focus {
+  background: var(--md-default-fg-color);
+  border-color: var(--md-default-fg-color);
+  color: var(--md-default-bg-color);
+  opacity: 0.88;
+}
+.arcanum-hero p:has(.md-button) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.arcanum-hero .md-button {
+  margin: 0;
+}
+
+/* No escuro, o que o Material pinta com a cor primária (ícones do topo, editar a página,
+   copiar o código, seleção na busca) ficava preto sobre preto. */
+[data-md-color-scheme="slate"] .md-content__button,
+[data-md-color-scheme="slate"] .md-clipboard,
+[data-md-color-scheme="slate"] .md-source,
+[data-md-color-scheme="slate"] .md-header__button {
+  color: var(--md-default-fg-color--light);
+}
+[data-md-color-scheme="slate"] .md-content__button:hover,
+[data-md-color-scheme="slate"] .md-clipboard:hover {
+  color: var(--md-default-fg-color);
+}
