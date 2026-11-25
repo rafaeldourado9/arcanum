@@ -14,6 +14,7 @@
   <a href="https://github.com/rafaeldourado9/arcanum/releases"><img src="https://img.shields.io/github/v/release/rafaeldourado9/arcanum?sort=semver" alt="Versão"></a>
   <img src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-black.svg" alt="MIT"></a>
+  <a href="https://arcanumgateway.com.br/"><img src="https://img.shields.io/badge/docs-arcanumgateway.com.br-black.svg" alt="Documentação"></a>
 </p>
 
 <p align="center">
@@ -71,8 +72,13 @@
 | **Serviço do systemd** | `curl -fsSL https://arcanumgateway.com.br/install.sh \| sh -s -- --systemd` |
 | **Binário** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
 
-No Windows, o instalador do PowerShell funciona mesmo com scripts bloqueados. Para usar o npx
-no PowerShell, digite `npx.cmd` no lugar de `npx`.
+No Windows, o instalador do PowerShell funciona mesmo com scripts bloqueados e não pede
+administrador. O `npx` precisa do **Git** instalado; no PowerShell, digite `npx.cmd` no lugar de
+`npx`. No Linux sem sudo, instale na sua pasta:
+`curl -fsSL https://arcanumgateway.com.br/install.sh | ARCANUM_BIN_DIR="$HOME/.local/bin" sh`.
+
+Todos os instaladores baixam a versão publicada nas Releases e conferem o SHA-256 antes de
+instalar. Testados em Ubuntu 24.04, Alpine, Node.js 22 e Windows 11.
 
 Depois abra **http://localhost:3100**. Detalhes: [Instalação](https://arcanumgateway.com.br/installation/).
 
@@ -116,7 +122,8 @@ respostas automáticas, atendimento humano, avisos pelo seu sistema e troca de s
 
 O guia completo (sessões, todos os tipos de mensagem, formatos do webhook com verificação de
 assinatura em Python, Node.js, Go e PHP, produção com HTTPS, monitoramento e problemas comuns)
-está em **[arcanumgateway.com.br/pt](https://arcanumgateway.com.br/)**. As mesmas
+está em **[arcanumgateway.com.br](https://arcanumgateway.com.br/)** (em inglês em
+[/en](https://arcanumgateway.com.br/en/)). As mesmas
 páginas ficam em [`docs/pt/`](docs/pt/) neste repositório.
 
 ## Recursos

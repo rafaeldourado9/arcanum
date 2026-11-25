@@ -14,6 +14,7 @@
   <a href="https://github.com/rafaeldourado9/arcanum/releases"><img src="https://img.shields.io/github/v/release/rafaeldourado9/arcanum?sort=semver" alt="Release"></a>
   <img src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-black.svg" alt="MIT"></a>
+  <a href="https://arcanumgateway.com.br/en/"><img src="https://img.shields.io/badge/docs-arcanumgateway.com.br-black.svg" alt="Docs"></a>
 </p>
 
 <p align="center">
@@ -70,8 +71,13 @@
 | **systemd service** | `curl -fsSL https://arcanumgateway.com.br/install.sh \| sh -s -- --systemd` |
 | **Binary** (Linux, macOS, Windows) | [Releases](https://github.com/rafaeldourado9/arcanum/releases) |
 
-On Windows, the PowerShell installer works even when scripts are disabled. To use npx from
-PowerShell, type `npx.cmd` instead of `npx`.
+On Windows, the PowerShell installer works even when scripts are disabled and needs no
+admin rights. `npx` needs **Git** installed; from PowerShell, type `npx.cmd` instead of `npx`.
+On Linux without sudo, install into your own folder:
+`curl -fsSL https://arcanumgateway.com.br/install.sh | ARCANUM_BIN_DIR="$HOME/.local/bin" sh`.
+
+Every installer downloads the published release and checks its SHA-256 before installing.
+Tested on Ubuntu 24.04, Alpine, Node.js 22 and Windows 11.
 
 Then open **http://localhost:3100**. Details: [Installation](https://arcanumgateway.com.br/en/installation/).
 
