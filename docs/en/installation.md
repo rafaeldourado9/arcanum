@@ -95,7 +95,7 @@ Ready-made Compose files live in the repository's
 
     ```bash
     curl -fsSLO https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/docker-compose.yml
-    curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/.env.example -o .env
+    curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/.env.example -o .env
     # edit .env: set GATEWAY_API_KEY and GATEWAY_DASHBOARD_PASSWORD
     docker compose up -d
     ```
@@ -104,7 +104,7 @@ Ready-made Compose files live in the repository's
 
     ```bash
     curl -fsSLO https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/docker-compose.caddy.yml
-    curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/.env.example -o .env
+    curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/.env.example -o .env
     echo "ARCANUM_DOMAIN=wa.example.com" >> .env   # its DNS must point to this server
     # edit .env: set GATEWAY_API_KEY and GATEWAY_DASHBOARD_PASSWORD
     docker compose -f docker-compose.caddy.yml up -d

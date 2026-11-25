@@ -1,5 +1,5 @@
 # Arcanum on this machine only (http://localhost:3100).
-#   cp ../.env.example .env   # fill GATEWAY_API_KEY and GATEWAY_DASHBOARD_PASSWORD
+#   cp .env.example .env      # fill GATEWAY_API_KEY and GATEWAY_DASHBOARD_PASSWORD
 #   docker compose up -d
 # For a public server with HTTPS, use docker-compose.caddy.yml instead.
 services:

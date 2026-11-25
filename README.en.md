@@ -152,7 +152,7 @@ Everything is set through environment variables. The essentials:
 | `GATEWAY_WEBHOOK_FORMAT` | `simple` | `simple` or `meta`. |
 | `GATEWAY_DASHBOARD_PASSWORD` | | Dashboard password (without it, sign in with the API key). |
 
-See [`.env.example`](.env.example) and the
+See [`.env.example`](.env.example) (binary) or [`deploy/.env.example`](deploy/.env.example) (Docker Compose) and the
 [configuration reference](https://arcanumgateway.com.br/en/configuration/).
 
 ## Development

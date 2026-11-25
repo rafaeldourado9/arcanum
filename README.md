@@ -153,7 +153,7 @@ Tudo é configurado por variáveis de ambiente. O essencial:
 | `GATEWAY_WEBHOOK_FORMAT` | `simple` | `simple` ou `meta`. |
 | `GATEWAY_DASHBOARD_PASSWORD` | | Senha do painel (sem ela, o login usa a chave de API). |
 
-Veja o [`.env.example`](.env.example) e a
+Veja o [`.env.example`](.env.example) (binário) ou o [`deploy/.env.example`](deploy/.env.example) (Docker Compose) e a
 [referência de configuração](https://arcanumgateway.com.br/configuration/).
 
 ## Desenvolvimento

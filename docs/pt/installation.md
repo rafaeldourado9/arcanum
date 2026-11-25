@@ -93,7 +93,7 @@ Arquivos de Compose prontos ficam na pasta
 
     ```bash
     curl -fsSLO https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/docker-compose.yml
-    curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/.env.example -o .env
+    curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/.env.example -o .env
     # edite o .env: defina GATEWAY_API_KEY e GATEWAY_DASHBOARD_PASSWORD
     docker compose up -d
     ```
@@ -102,7 +102,7 @@ Arquivos de Compose prontos ficam na pasta
 
     ```bash
     curl -fsSLO https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/docker-compose.caddy.yml
-    curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/.env.example -o .env
+    curl -fsSL https://raw.githubusercontent.com/rafaeldourado9/arcanum/main/deploy/.env.example -o .env
     echo "ARCANUM_DOMAIN=wa.exemplo.com" >> .env   # o DNS tem que apontar para este servidor
     # edite o .env: defina GATEWAY_API_KEY e GATEWAY_DASHBOARD_PASSWORD
     docker compose -f docker-compose.caddy.yml up -d
