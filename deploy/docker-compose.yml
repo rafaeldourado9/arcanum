@@ -7,6 +7,10 @@ services:
     image: ghcr.io/rafaeldourado9/arcanum:latest
     restart: unless-stopped
     env_file: .env
+    environment:
+      # Sessions live in the volume. Overrides GATEWAY_DB_PATH from .env (the example
+      # file had ./data, which fails on the read-only filesystem and loops on restart).
+      GATEWAY_DB_PATH: /data
     ports:
       - "127.0.0.1:3100:3100"
     volumes:
