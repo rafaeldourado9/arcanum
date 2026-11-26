@@ -145,6 +145,27 @@ type WhatsAppProvider interface {
 	PairPhone(phone string) (string, error)
 }
 
+// CallHandler recebe uma chamada de voz/video recebida: from e quem ligou, callID identifica
+// a chamada (necessario para recusar).
+type CallHandler func(from, callID string)
+
+// CallSupport e implementada por providers que enxergam chamadas recebidas e conseguem
+// recusa-las. E' interface opcional (o gerenciador confere com type assertion): um provider
+// sem esse recurso simplesmente nao recusa chamadas.
+type CallSupport interface {
+	// OnCall registra o callback das chamadas recebidas.
+	OnCall(handler CallHandler)
+	// RejectCall recusa a chamada recebida.
+	RejectCall(from, callID string) error
+}
+
+// OnlineKeeper e implementada por providers que conseguem se manter "online" enquanto
+// conectados (opcional, ver CallSupport).
+type OnlineKeeper interface {
+	// SetAlwaysOnline liga ou desliga a presenca "online" continua.
+	SetAlwaysOnline(on bool)
+}
+
 // NumberCheck e o resultado da verificacao de um numero no WhatsApp.
 type NumberCheck struct {
 	Number string `json:"number"`        // Numero consultado

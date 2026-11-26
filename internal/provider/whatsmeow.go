@@ -39,6 +39,9 @@ type WhatsmeowProvider struct {
 	qrCode            string
 	handler           MessageHandler
 	presence          PresenceHandler
+	callHandler       CallHandler
+	alwaysOnline      bool
+	onlineCancel      context.CancelFunc // para o keep-alive de presenca em andamento
 	subscribed        map[types.JID]bool // contatos cujo "digitando..." ja foi pedido nesta conexao
 	mu                sync.RWMutex
 	reconnectAttempts int
@@ -199,6 +202,10 @@ func (w *WhatsmeowProvider) eventHandler(evt interface{}) {
 		log.Println("[whatsmeow] Connected")
 		// O WhatsApp so entrega o "digitando..." dos contatos a quem esta online.
 		go func() { _ = w.client.SendPresence(context.Background(), types.PresenceAvailable) }()
+		w.syncOnline()
+
+	case *events.CallOffer:
+		w.handleCall(v)
 
 	case *events.Disconnected:
 		log.Println("[whatsmeow] Disconnected")
@@ -440,6 +447,7 @@ func (w *WhatsmeowProvider) reconnect() {
 }
 
 func (w *WhatsmeowProvider) Disconnect() error {
+	w.stopOnline()
 	if c := w.currentClient(); c != nil {
 		c.Disconnect()
 	}
@@ -449,6 +457,7 @@ func (w *WhatsmeowProvider) Disconnect() error {
 // Close encerra a sessao de vez (desligar o gateway ou apagar a instancia): desconecta e
 // fecha o banco SQLite da sessao.
 func (w *WhatsmeowProvider) Close() error {
+	w.stopOnline()
 	w.mu.Lock()
 	client, container := w.client, w.container
 	w.client, w.container = nil, nil

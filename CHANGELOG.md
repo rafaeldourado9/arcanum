@@ -5,6 +5,20 @@ Todas as mudanças notaveis do projeto serao documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e o projeto adere ao [Versionamento Semantico](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+
+### Corrigido
+
+- **Três configurações da sessão apareciam no painel e na API mas não faziam nada.** Agora
+  funcionam de verdade, por sessão e sem reiniciar:
+  - **Recusar chamadas** (`rejectCalls`): a chamada recebida é recusada.
+  - **Sempre online** (`alwaysOnline`): a sessão reenvia a presença "disponível" a cada minuto
+    enquanto conectada.
+  - **Confirmação de leitura automática** (`readMessages`): mensagens de contatos são marcadas
+    como lidas depois de 1 a 3 s (não marca as que o próprio número enviou).
+- Atenção: `readMessages` já vinha ligado por padrão (e sem efeito). Sessões existentes passam
+  a confirmar leitura; desligue em `POST /api/settings/{instance}` se não quiser.
+
 ## [1.1.1] - 2026-11-25
 
 Correções de instalação, achadas testando todas as formas de instalar do zero.

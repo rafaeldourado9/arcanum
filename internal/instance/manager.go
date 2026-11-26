@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -282,6 +283,12 @@ func (m *Manager) create(name string, meta *persisted, persist bool) (*Instance,
 		// costuma ir para lugares com menos protecao que o banco. So o tipo e a sessao.
 		slog.Debug("message received", "instance", name, "type", msg.Type, "from_me", msg.FromMe)
 
+		// Confirmacao de leitura automatica: so de mensagem de contato (nao do proprio
+		// numero) e depois de uma pausa curta aleatoria, como uma pessoa abrindo a conversa.
+		if inst.Settings().ReadMessages && !msg.FromMe && msg.MessageID != "" {
+			markReadSoon(wp, msg)
+		}
+
 		if fwd, on := inst.webhookOn(); on {
 			fwd.Forward(msg)
 		}
@@ -292,6 +299,24 @@ func (m *Manager) create(name string, meta *persisted, persist bool) (*Instance,
 			fwd.ReportTyping(from, composing)
 		}
 	})
+
+	// Recusar chamadas: o provider avisa a chamada recebida; a decisao le a configuracao no
+	// momento (ligar/desligar vale sem reiniciar).
+	if cs, ok := wp.(provider.CallSupport); ok {
+		cs.OnCall(func(from, callID string) {
+			if !inst.Settings().RejectCalls {
+				return
+			}
+			if err := cs.RejectCall(from, callID); err != nil {
+				slog.Warn("reject call failed", "instance", name, "error", err)
+				return
+			}
+			slog.Info("call rejected", "instance", name)
+		})
+	}
+	if keeper, is := wp.(provider.OnlineKeeper); is {
+		keeper.SetAlwaysOnline(meta.Settings.AlwaysOnline)
+	}
 
 	m.instances[name] = inst
 	m.mu.Unlock()
@@ -458,8 +483,27 @@ func (m *Manager) UpdateSettings(name string, apply func(*Settings) error) (Sett
 	inst.settings = s
 	inst.mu.Unlock()
 
+	if keeper, is := inst.Provider.(provider.OnlineKeeper); is {
+		keeper.SetAlwaysOnline(s.AlwaysOnline)
+	}
+
 	m.save(inst)
 	return s, nil
+}
+
+// readReceiptDelay e a pausa antes de confirmar a leitura (variavel para os testes).
+var readReceiptDelay = func() time.Duration {
+	// #nosec G404 -- jitter do anti-ban; previsibilidade aqui nao tem impacto de seguranca
+	return time.Duration(1000+rand.Intn(2000)) * time.Millisecond
+}
+
+// markReadSoon confirma a leitura da mensagem depois de uma pausa curta.
+func markReadSoon(p provider.WhatsAppProvider, msg provider.IncomingMessage) {
+	time.AfterFunc(readReceiptDelay(), func() {
+		if err := p.MarkAsRead(msg.MessageID, msg.From); err != nil {
+			slog.Debug("auto read receipt failed", "error", err)
+		}
+	})
 }
 
 // TestWebhook manda um evento de teste para o webhook da instancia.
