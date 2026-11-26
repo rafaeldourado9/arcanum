@@ -31,6 +31,43 @@ file, can read and send messages as that number. Treat it like a database.
 | Shutdown | Graceful on `SIGTERM`: session files closed cleanly. |
 | Supply chain | Every change runs the race detector, `go vet`, `staticcheck`, `govulncheck`, `gosec` and a Trivy image scan. Dependabot updates dependencies weekly. |
 
+## Hosting for several customers (scoped keys)
+
+You can run Arcanum on a server and give each integrator (AI agent, third-party system,
+another company) access to **only their own sessions**, without handing over the master key.
+The integrator never needs to know who your other customers are: they only see their sessions.
+
+```bash
+# 1. You (admin, master key) create the session and its key
+curl -X POST http://localhost:3100/api/instance/create -H "X-Api-Key: $GATEWAY_API_KEY" \
+  -d '{"instanceName":"acme-shop","webhook":"https://agent.example.com/whatsapp"}'
+
+curl -X POST http://localhost:3100/api/keys -H "X-Api-Key: $GATEWAY_API_KEY" \
+  -d '{"name":"acme-agent","instances":["acme-shop"],"readOnly":false}'
+# response: {"secret":"arc_..."}  <- shown ONCE; hand it to the integrator
+
+# 2. A signing secret for this session only (the integrator verifies X-Hub-Signature-256 with it)
+curl -X POST http://localhost:3100/api/events/webhook/acme-shop/secret -H "X-Api-Key: $GATEWAY_API_KEY"
+```
+
+| Key | What it reaches |
+|---|---|
+| Master (`GATEWAY_API_KEY`) and dashboard | Everything. |
+| Scoped (`arc_...`) | Only the listed sessions: send, configure the webhook and read their state. Another customer's session answers `404`, same as one that does not exist. It cannot create or delete sessions, manage keys, or read metrics, logs or audit. |
+| Scoped `readOnly` | Queries only: state, settings, deliveries, lookups. No sending, no configuration changes, no starting a connection. |
+
+- **Revoking** is immediate: `DELETE /api/keys/{id}`. The key stays listed as revoked.
+- Only the key **hash** is stored (`600` file at `<data>/.arcanum/keys.json`).
+- **Per-session webhook secret:** each session can have its own; the API never shows it again
+  (only `hasSecret`). Without one, the global `GATEWAY_META_APP_SECRET` applies.
+- **Lockout:** 20 wrong keys from one IP within 15 minutes lock that IP out (`429`) for 15
+  minutes. Requests with no key do not count (the dashboard asks before login). Behind a proxy
+  every request comes from the proxy IP, so the limit becomes global.
+- **Audit:** `GET /api/audit` (admin only) lists who did what: login, create/delete/reconnect
+  a session, change settings or webhook, create/revoke a key and denied access. Stored at
+  `<data>/.arcanum/audit.log` (`600`, rotates at 5 MB). It never contains keys, secrets, phone
+  numbers or message text.
+
 ## Reporting a vulnerability
 
 Please do not open a public issue. Use **Security > Report a vulnerability** on the

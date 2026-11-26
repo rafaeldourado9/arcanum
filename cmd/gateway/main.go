@@ -10,14 +10,17 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/rafaeldourado9/arcanum/internal/api"
+	"github.com/rafaeldourado9/arcanum/internal/audit"
 	"github.com/rafaeldourado9/arcanum/internal/config"
 	"github.com/rafaeldourado9/arcanum/internal/instance"
+	"github.com/rafaeldourado9/arcanum/internal/keys"
 	"github.com/rafaeldourado9/arcanum/internal/logbuf"
 )
 
@@ -58,11 +61,27 @@ func main() {
 		}
 	}
 
+	// Chaves de escopo e auditoria ficam em <dados>/.arcanum: o gerenciador le so arquivos soltos
+	// da pasta de dados (um keys.json la viraria uma sessao chamada "keys").
+	stateDir := filepath.Join(cfg.DBPath, ".arcanum")
+	if err := os.MkdirAll(stateDir, 0o700); err != nil {
+		log.Fatalf("failed to create %s: %v", stateDir, err)
+	}
+	keyStore, err := keys.Open(filepath.Join(stateDir, "keys.json"))
+	if err != nil {
+		log.Fatalf("open API key store: %v", err)
+	}
+	auditLog, err := audit.Open(filepath.Join(stateDir, "audit.log"))
+	if err != nil {
+		log.Fatalf("open audit log: %v", err)
+	}
+	defer auditLog.Close()
+
 	mgr := instance.NewManager(cfg)
 	addr := ":" + strconv.Itoa(cfg.Port)
 	srv := &http.Server{
 		Addr:              addr,
-		Handler:           api.NewServerWith(mgr, cfg, api.Deps{Logs: logs}),
+		Handler:           api.NewServerWith(mgr, cfg, api.Deps{Logs: logs, Keys: keyStore, Audit: auditLog}),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       2 * time.Minute, // upload de midia grande
 		// Envio com anti-ban espera "digitando..." e o limite por minuto antes de responder.

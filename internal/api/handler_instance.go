@@ -89,6 +89,7 @@ func handleCreateInstance(mgr *instance.Manager) http.HandlerFunc {
 			return
 		}
 
+		setAuditTarget(r, req.InstanceName)
 		inst, err := mgr.Create(req.InstanceName, req.Webhook, req.WebhookEvents)
 		if err != nil {
 			status := http.StatusBadRequest
@@ -255,6 +256,19 @@ func handleGetQR(mgr *instance.Manager) http.HandlerFunc {
 
 func handleFetchInstances(mgr *instance.Manager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, 200, mgr.List())
+		all := mgr.List()
+		p := scopeFrom(r)
+		if p.admin {
+			writeJSON(w, 200, all)
+			return
+		}
+		// Chave de escopo: so as sessoes dela, nunca a lista inteira do servidor.
+		mine := make([]instance.InstanceInfo, 0, len(p.key.Instances))
+		for _, info := range all {
+			if p.canSee(info.Name) {
+				mine = append(mine, info)
+			}
+		}
+		writeJSON(w, 200, mine)
 	}
 }

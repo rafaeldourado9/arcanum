@@ -7,6 +7,8 @@
 package instance
 
 import (
+	crand "crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -36,13 +38,18 @@ type Instance struct {
 	mu         sync.RWMutex
 	settings   Settings
 	webhookCfg WebhookConfig
-	forwarder  *webhook.Forwarder
+	// webhookSecret e o segredo de assinatura so desta sessao (vazio: vale o global,
+	// GATEWAY_META_APP_SECRET). Nunca sai pela API: so "hasSecret".
+	webhookSecret string
+	forwarder     *webhook.Forwarder
 }
 
 type WebhookConfig struct {
 	URL     string   `json:"url"`
 	Events  []string `json:"events"`
 	Enabled bool     `json:"enabled"`
+	// HasSecret diz se a sessao tem segredo proprio de assinatura (o valor nunca e exibido).
+	HasSecret bool `json:"hasSecret"`
 }
 
 type Settings struct {
@@ -75,6 +82,7 @@ func (i *Instance) WebhookConfig() WebhookConfig {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
 	c := i.webhookCfg
+	c.HasSecret = i.webhookSecret != ""
 	c.Events = append([]string(nil), i.webhookCfg.Events...)
 	return c
 }
@@ -117,6 +125,8 @@ type persisted struct {
 	CreatedAt time.Time     `json:"createdAt"`
 	Settings  Settings      `json:"settings"`
 	Webhook   WebhookConfig `json:"webhook"`
+	// WebhookSecret e o segredo de assinatura desta sessao (arquivo 0600).
+	WebhookSecret string `json:"webhookSecret,omitempty"`
 }
 
 type Manager struct {
@@ -200,7 +210,10 @@ func (m *Manager) loadMeta(name string) *persisted {
 // save grava a configuracao da instancia (escrita atomica: arquivo temporario + rename,
 // para uma queda no meio nao deixar JSON pela metade).
 func (m *Manager) save(inst *Instance) {
-	p := persisted{CreatedAt: inst.CreatedAt, Settings: inst.Settings(), Webhook: inst.WebhookConfig()}
+	inst.mu.RLock()
+	secret := inst.webhookSecret
+	inst.mu.RUnlock()
+	p := persisted{CreatedAt: inst.CreatedAt, Settings: inst.Settings(), Webhook: inst.WebhookConfig(), WebhookSecret: secret}
 	b, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
 		log.Printf("[manager] save '%s': %v", inst.Name, err)
@@ -266,13 +279,14 @@ func (m *Manager) create(name string, meta *persisted, persist bool) (*Instance,
 
 	wp := m.newProvider(m.dbFile(name))
 	inst := &Instance{
-		Name:       name,
-		Provider:   wp,
-		Limiter:    antiban.NewRateLimiter(m.cfg.RateLimitPerMin),
-		CreatedAt:  meta.CreatedAt,
-		settings:   meta.Settings,
-		webhookCfg: whCfg,
-		forwarder:  webhook.NewForwarder(whCfg.URL, m.cfg.WebhookFormat, m.cfg.WebhookSecret),
+		Name:          name,
+		Provider:      wp,
+		Limiter:       antiban.NewRateLimiter(m.cfg.RateLimitPerMin),
+		CreatedAt:     meta.CreatedAt,
+		settings:      meta.Settings,
+		webhookCfg:    whCfg,
+		webhookSecret: meta.WebhookSecret,
+		forwarder:     webhook.NewForwarder(whCfg.URL, m.cfg.WebhookFormat, m.secretFor(meta.WebhookSecret)),
 	}
 
 	wp.OnMessage(func(msg provider.IncomingMessage) {
@@ -435,6 +449,33 @@ type WebhookUpdate struct {
 	URL     *string
 	Events  []string
 	Enabled *bool
+	// Secret: segredo proprio de assinatura da sessao. "" apaga e volta ao segredo global.
+	Secret *string
+}
+
+// MinWebhookSecret e o tamanho minimo de um segredo escolhido pelo operador.
+const MinWebhookSecret = 16
+
+// secretFor e o segredo que assina os webhooks: o da sessao, ou o global se ela nao tem.
+func (m *Manager) secretFor(own string) string {
+	if own != "" {
+		return own
+	}
+	return m.cfg.WebhookSecret
+}
+
+// RotateWebhookSecret gera um segredo novo para a sessao e o devolve (unica vez em que ele
+// aparece). O backend que valida a assinatura precisa receber o valor novo.
+func (m *Manager) RotateWebhookSecret(name string) (string, error) {
+	b := make([]byte, 32)
+	if _, err := crand.Read(b); err != nil {
+		return "", err
+	}
+	secret := "whsec_" + hex.EncodeToString(b)
+	if _, err := m.UpdateWebhook(name, WebhookUpdate{Secret: &secret}); err != nil {
+		return "", err
+	}
+	return secret, nil
 }
 
 // UpdateWebhook muda o webhook da instancia e grava. URL nova cria um forwarder novo, mas
@@ -450,10 +491,22 @@ func (m *Manager) UpdateWebhook(name string, u WebhookUpdate) (WebhookConfig, er
 		}
 	}
 
+	if u.Secret != nil && *u.Secret != "" && len(*u.Secret) < MinWebhookSecret {
+		return WebhookConfig{}, fmt.Errorf("webhook secret too short: use at least %d characters (or rotate for a random one)", MinWebhookSecret)
+	}
+
 	inst.mu.Lock()
+	rebuild := false
 	if u.URL != nil && *u.URL != inst.webhookCfg.URL {
 		inst.webhookCfg.URL = *u.URL
-		inst.forwarder = webhook.NewForwarder(*u.URL, m.cfg.WebhookFormat, m.cfg.WebhookSecret).
+		rebuild = true
+	}
+	if u.Secret != nil && *u.Secret != inst.webhookSecret {
+		inst.webhookSecret = *u.Secret
+		rebuild = true
+	}
+	if rebuild {
+		inst.forwarder = webhook.NewForwarder(inst.webhookCfg.URL, m.cfg.WebhookFormat, m.secretFor(inst.webhookSecret)).
 			WithHistory(inst.forwarder.History())
 	}
 	if len(u.Events) > 0 {

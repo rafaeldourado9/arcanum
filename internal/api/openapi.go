@@ -36,6 +36,7 @@ func openAPISpec() map[string]any {
 			{"name": "Settings", "description": "Per-instance behaviour"},
 			{"name": "System", "description": "Health, metrics, logs and this documentation"},
 			{"name": "Auth", "description": "Dashboard login (browser session). API clients use the API key instead."},
+			{"name": "Keys", "description": "Scoped API keys for integrators: each one sees only its own sessions"},
 		},
 		"paths": buildPaths(),
 	}
@@ -149,8 +150,10 @@ func buildPaths() map[string]any {
 				"url":     strProp("Webhook URL", "https://example.com/webhooks/whatsapp"),
 				"events":  arrProp("Events to subscribe", []string{"messages", "status"}),
 				"enabled": boolProp("Deliver events", true),
+				"secret":  strProp("Signing secret of this session only (min 16 chars; empty goes back to the global one). Never returned by the API: only `hasSecret`.", ""),
 			})),
 		},
+		"/api/events/webhook/{instance}/secret":     pathPost("Events", "Rotate webhook secret", "Generate a new signing secret for this session (`X-Hub-Signature-256`). The value is shown only in this response.", nil),
 		"/api/events/webhook/{instance}/test":       pathPost("Events", "Test webhook", "Send a signed `{\"event\":\"test\"}` delivery to the webhook and return the result (status, duration, error).", nil),
 		"/api/events/webhook/{instance}/deliveries": pathGetParam("Events", "Webhook deliveries", "Last 100 deliveries of this session: event, HTTP status, duration, error. Bodies are not stored.", "instance"),
 		"/api/events/webhooks/export":               pathGet("Events", "Export webhooks", "Webhook configuration of every session as a JSON file."),
@@ -158,14 +161,26 @@ func buildPaths() map[string]any {
 			"webhooks": map[string]any{"type": "object", "description": "instance name -> {url, events, enabled}"},
 		}))},
 
+		// ── Keys and audit (admin only) ──
+		"/api/keys": map[string]any{
+			"get": op("Keys", "List API keys", "Scoped keys, including revoked ones. Never contains the secret. Admin only (master key or dashboard)."),
+			"post": opBody("Keys", "Create API key", "Create a key limited to the listed sessions, optionally read-only. The secret (`arc_...`) is shown only in this response. A scoped key sees only its own sessions and cannot create or delete sessions, manage keys or read metrics, logs and audit.", bodyObj(map[string]any{
+				"name":      strProp("Who or what uses it (shown in the list)", "support-agent"),
+				"instances": arrProp("Sessions this key may use", []string{"sales"}),
+				"readOnly":  boolProp("Only queries: no sending, no configuration changes", false),
+			})),
+		},
+		"/api/keys/{id}": pathDelParam("Keys", "Revoke API key", "Disable the key immediately. It stays in the list as revoked.", "id"),
+		"/api/audit":     pathGet("System", "Audit log", "Last sensitive actions (`?limit=100`, max 500), newest first: who (key id, panel or admin), from which IP, what and on which session. Never contains keys, secrets or message content. Admin only."),
+
 		// ── Settings ──
 		"/api/settings/{instance}": map[string]any{
 			"get": op("Settings", "Get settings", "Current settings of the session."),
-			"post": opBody("Settings", "Update settings", "Today only `groupsIgnore` changes behaviour; the other flags are stored for upcoming releases.", bodyObj(map[string]any{
+			"post": opBody("Settings", "Update settings", "Only the fields you send change. `groupsIgnore`, `rejectCalls`, `alwaysOnline` and `readMessages` take effect immediately, no restart; the other flags are stored for upcoming releases.", bodyObj(map[string]any{
 				"groupsIgnore":    boolProp("Do not forward group messages", true),
-				"rejectCalls":     boolProp("Planned: auto-reject calls", false),
-				"alwaysOnline":    boolProp("Planned: always online", false),
-				"readMessages":    boolProp("Planned: auto read receipts", true),
+				"rejectCalls":     boolProp("Reject incoming voice/video calls", false),
+				"alwaysOnline":    boolProp("Stay online while connected (presence refreshed every minute)", false),
+				"readMessages":    boolProp("Send read receipts for contact messages after 1-3 s", true),
 				"readStatus":      boolProp("Planned: auto read status", false),
 				"syncFullHistory": boolProp("Planned: full history sync", false),
 			})),

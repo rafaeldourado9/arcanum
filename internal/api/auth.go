@@ -2,13 +2,13 @@ package api
 
 import (
 	"crypto/rand"
-	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/rafaeldourado9/arcanum/internal/audit"
 	"github.com/rafaeldourado9/arcanum/internal/dashauth"
 )
 
@@ -32,34 +32,11 @@ func needsAuth(path string) bool {
 	return strings.HasPrefix(path, "/api/") || path == "/metrics"
 }
 
-// requireAuth aceita a chave de API (X-Api-Key ou Bearer) ou, para o painel, cookie de
-// sessao + header anti-CSRF. A chave e comparada em tempo constante.
-func requireAuth(key string, sessions *dashauth.Auth) func(http.Handler) http.Handler {
-	want := []byte(key)
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if !needsAuth(r.URL.Path) {
-				next.ServeHTTP(w, r)
-				return
-			}
-			if got := []byte(apiKeyFrom(r)); len(got) > 0 && subtle.ConstantTimeCompare(got, want) == 1 {
-				next.ServeHTTP(w, r)
-				return
-			}
-			if sessions != nil && sessions.Authenticated(r) {
-				next.ServeHTTP(w, r)
-				return
-			}
-			w.Header().Set("WWW-Authenticate", `Bearer realm="arcanum"`)
-			writeJSON(w, http.StatusUnauthorized, map[string]string{
-				"error": "missing or invalid API key (send X-Api-Key or Authorization: Bearer)",
-			})
-		})
-	}
+// requireAPIKey: so a chave mestra (usado nos testes do middleware). A autenticacao de
+// verdade, com chaves de escopo, painel, bloqueio e auditoria, esta em authz.go.
+func requireAPIKey(key string) func(http.Handler) http.Handler {
+	return newAuthGuard(key, authDeps{}).middleware
 }
-
-// requireAPIKey: so a chave (usado nos testes do middleware).
-func requireAPIKey(key string) func(http.Handler) http.Handler { return requireAuth(key, nil) }
 
 func apiKeyFrom(r *http.Request) string {
 	if k := strings.TrimSpace(r.Header.Get("X-Api-Key")); k != "" {
@@ -99,7 +76,7 @@ func limitBody(maxBytes int64) func(http.Handler) http.Handler {
 
 // ── login do painel ──
 
-func handleLogin(sessions *dashauth.Auth) http.HandlerFunc {
+func handleLogin(sessions *dashauth.Auth, aud *audit.Log) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if sessions == nil {
 			writeJSON(w, http.StatusNotFound, map[string]string{"error": "dashboard login is disabled"})
@@ -119,10 +96,12 @@ func handleLogin(sessions *dashauth.Auth) http.HandlerFunc {
 		}
 		token, ok := sessions.Login(ip, req.Password)
 		if !ok {
+			aud.Record(audit.Event{Actor: "-", IP: ip, Action: "login.failed", Status: http.StatusUnauthorized})
 			time.Sleep(400 * time.Millisecond) // encarece tentativa automatizada
 			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "wrong password"})
 			return
 		}
+		aud.Record(audit.Event{Actor: "panel", IP: ip, Action: "login", Status: http.StatusOK})
 		dashauth.SetCookie(w, r, token)
 		writeJSON(w, http.StatusOK, map[string]any{"authenticated": true})
 	}

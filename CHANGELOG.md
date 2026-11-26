@@ -7,6 +7,21 @@ e o projeto adere ao [Versionamento Semantico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+### Adicionado
+
+- **Chaves de API com escopo** (`POST /api/keys`): cada integrador recebe uma chave que enxerga
+  só as sessões dele, opcionalmente somente-leitura. Não cria nem apaga sessão, não gerencia
+  chaves e não lê métricas, logs nem auditoria. Sessão de outro cliente responde `404`. A chave
+  aparece uma vez; em disco fica só o hash. Revogação imediata (`DELETE /api/keys/{id}`).
+- **Segredo de webhook por sessão** (`secret` em `POST /api/events/webhook/{instance}` ou
+  `POST /api/events/webhook/{instance}/secret` para gerar um): a API nunca o mostra, só
+  `hasSecret`. Sem segredo próprio vale o global.
+- **Bloqueio por IP** depois de 20 chaves de API erradas em 15 minutos (`429`).
+- **Log de auditoria** (`GET /api/audit`, só admin; `<dados>/.arcanum/audit.log`, `600`):
+  login, sessão criada/apagada/reconectada, configuração e webhook alterados, chaves, acessos
+  negados. Sem chaves, segredos, telefones nem mensagens.
+- Chaves e auditoria ficam em `<dados>/.arcanum/` (o gerenciador ignora subpastas).
+
 ### Corrigido
 
 - **Três configurações da sessão apareciam no painel e na API mas não faziam nada.** Agora

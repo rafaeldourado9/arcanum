@@ -33,6 +33,24 @@ type setWebhookReq struct {
 	URL     *string  `json:"url"`
 	Events  []string `json:"events"`
 	Enabled *bool    `json:"enabled"`
+	// Secret: segredo proprio de assinatura desta sessao ("" volta ao segredo global).
+	Secret *string `json:"secret"`
+}
+
+// handleRotateWebhookSecret gera um segredo novo de assinatura para a sessao. O valor aparece
+// so nesta resposta; depois a API mostra apenas "hasSecret".
+func handleRotateWebhookSecret(mgr *instance.Manager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		secret, err := mgr.RotateWebhookSecret(chi.URLParam(r, "instance"))
+		if err != nil {
+			notFoundOr400(w, err)
+			return
+		}
+		writeJSON(w, 200, map[string]any{
+			"secret": secret,
+			"notice": "Copy the secret now: it is shown only once. Use it to verify X-Hub-Signature-256 on your side.",
+		})
+	}
 }
 
 func handleSetWebhook(mgr *instance.Manager) http.HandlerFunc {
@@ -43,7 +61,7 @@ func handleSetWebhook(mgr *instance.Manager) http.HandlerFunc {
 			return
 		}
 		cfg, err := mgr.UpdateWebhook(chi.URLParam(r, "instance"), instance.WebhookUpdate{
-			URL: req.URL, Events: req.Events, Enabled: req.Enabled,
+			URL: req.URL, Events: req.Events, Enabled: req.Enabled, Secret: req.Secret,
 		})
 		if err != nil {
 			notFoundOr400(w, err)

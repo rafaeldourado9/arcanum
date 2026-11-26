@@ -8,10 +8,12 @@ import (
 
 	"strings"
 
+	"github.com/rafaeldourado9/arcanum/internal/audit"
 	"github.com/rafaeldourado9/arcanum/internal/config"
 	"github.com/rafaeldourado9/arcanum/internal/dashauth"
 	"github.com/rafaeldourado9/arcanum/internal/dashboard"
 	"github.com/rafaeldourado9/arcanum/internal/instance"
+	"github.com/rafaeldourado9/arcanum/internal/keys"
 	"github.com/rafaeldourado9/arcanum/internal/logbuf"
 	"github.com/rafaeldourado9/arcanum/internal/metrics"
 )
@@ -21,7 +23,9 @@ var Version = "dev"
 
 // Deps sao pecas opcionais do servidor (os testes montam sem elas).
 type Deps struct {
-	Logs *logbuf.Buffer // linhas de log para o painel
+	Logs  *logbuf.Buffer // linhas de log para o painel
+	Keys  *keys.Store    // chaves de API com escopo (nil: so a chave mestra)
+	Audit *audit.Log     // log de auditoria (nil: nao registra)
 }
 
 func NewServer(mgr *instance.Manager, cfg *config.Config) http.Handler {
@@ -48,7 +52,7 @@ func NewServerWith(mgr *instance.Manager, cfg *config.Config, deps Deps) http.Ha
 	r.Use(countResponses)
 	r.Use(securityHeaders)
 	if !cfg.AuthDisabled {
-		r.Use(requireAuth(cfg.APIKey, sessions))
+		r.Use(newAuthGuard(cfg.APIKey, authDeps{sessions: sessions, keys: deps.Keys, audit: deps.Audit}).middleware)
 	}
 	maxBody := cfg.MaxBodyMB
 	if maxBody <= 0 {
@@ -66,7 +70,13 @@ func NewServerWith(mgr *instance.Manager, cfg *config.Config, deps Deps) http.Ha
 	r.Get("/api/logs/stream", handleLogStream(deps.Logs))
 
 	// Dashboard login
-	r.Post("/api/auth/login", handleLogin(sessions))
+	r.Post("/api/auth/login", handleLogin(sessions, deps.Audit))
+
+	// Chaves de API com escopo e auditoria (so admin: ver authorize)
+	r.Get("/api/keys", handleListKeys(deps.Keys))
+	r.Post("/api/keys", handleCreateKey(deps.Keys, deps.Audit))
+	r.Delete("/api/keys/{id}", handleRevokeKey(deps.Keys, deps.Audit))
+	r.Get("/api/audit", handleAudit(deps.Audit))
 	r.Post("/api/auth/logout", handleLogout(sessions))
 	r.Get("/api/auth/me", handleMe(sessions, cfg.AuthDisabled))
 
@@ -105,6 +115,7 @@ func NewServerWith(mgr *instance.Manager, cfg *config.Config, deps Deps) http.Ha
 	r.Get("/api/events/webhook/{instance}", handleGetWebhook(mgr))
 	r.Post("/api/events/webhook/{instance}", handleSetWebhook(mgr))
 	r.Post("/api/events/webhook/{instance}/test", handleTestWebhook(mgr))
+	r.Post("/api/events/webhook/{instance}/secret", handleRotateWebhookSecret(mgr))
 	r.Get("/api/events/webhook/{instance}/deliveries", handleWebhookDeliveries(mgr))
 	r.Get("/api/events/webhooks/export", handleExportWebhooks(mgr))
 	r.Post("/api/events/webhooks/import", handleImportWebhooks(mgr))
